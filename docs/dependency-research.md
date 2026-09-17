@@ -9,7 +9,7 @@ Research date: 2026-09-17. Existing components and implementations were checked 
 | Settings cards | [Windows Community Toolkit](https://learn.microsoft.com/dotnet/communitytoolkit/windows/settingscontrols/settingscard) | [8.2.251219](https://www.nuget.org/packages/CommunityToolkit.WinUI.Controls.SettingsControls/8.2.251219) | Reuses `CommunityToolkit.WinUI.Controls.SettingsCard`; includes the native WinUI target. |
 | Observable state | [MVVM Toolkit](https://learn.microsoft.com/dotnet/communitytoolkit/mvvm/) | [8.4.2](https://www.nuget.org/packages/CommunityToolkit.Mvvm/8.4.2) | Reuses observable property and command infrastructure. |
 | Local credential encryption | [.NET ProtectedData / Windows DPAPI](https://learn.microsoft.com/dotnet/api/system.security.cryptography.protecteddata) | [8.0.0](https://www.nuget.org/packages/System.Security.Cryptography.ProtectedData/8.0.0) | Encrypts imported sessions for the current Windows user without custom cryptography. |
-| Music Web API and native media resolution | [youtube-music-core](https://github.com/meurz/youtube-music-core) | [v0.9.0](https://github.com/meurz/youtube-music-core/releases/tag/v0.9.0), commit `e3502de9d32323b30ba53f702b930c5fc78d8aad` | Reuses the existing Rust core, shipped C ABI, managed client and Windows source adapter; no duplicate protocol implementation. |
+| Music Web API and native media resolution | [youtube-music-core](https://github.com/meurz/youtube-music-core) | [v0.9.1](https://github.com/meurz/youtube-music-core/releases/tag/v0.9.1), commit `105fe13d98980a6ba24c24a3a323016c7ad3a502` | Reuses the existing Rust core, shipped C ABI, managed client and Windows source adapter; no duplicate protocol implementation. |
 | Localization and language selection | [Windows App SDK MRTCore](https://learn.microsoft.com/windows/apps/windows-app-sdk/mrtcore/mrtcore-overview) | Existing Windows App SDK 1.8 | Compiles `.resw` translations into the native PRI. `ResourceManager`, `ResourceContext.QualifierValues["Language"]` and `ResourceMap.TryGetValue` provide language selection for the C# interface without another framework. |
 | Native audio, adaptive source, system media controls | [Windows.Media.Playback.MediaPlayer](https://learn.microsoft.com/uwp/api/windows.media.playback.mediaplayer), [AdaptiveMediaSource](https://learn.microsoft.com/uwp/api/windows.media.streaming.adaptive.adaptivemediasource), [SMTC](https://learn.microsoft.com/windows/uwp/audio-video-camera/integrate-with-systemmediatransportcontrols) | Windows SDK, minimum build 19041 | Native AAC/DASH playback and Windows media integration. |
 
@@ -50,3 +50,12 @@ a freshly minted video-bound proof. Full AAC and Opus responses also reached the
 reported content lengths. Tokens and signed URLs remained only in memory.
 This establishes the need for a GVS proof in that sample; it does not establish
 universal availability or replace signed-in account acceptance testing.
+
+Production-service verification on Windows x64 recovered the sample's real HTTP
+403 with one forced proof refresh. Native playback reached `MediaEnded` after
+211.92 seconds, compared with 211.93 seconds remaining after sustained recovery.
+Midpoint seek, pause, same-video proof reuse, rapid replacement, cancellation,
+dispatcher notifications, and owned-worker disposal passed. An anonymous library
+login requirement also left subsequent public playback usable. Actual WinUI
+checks played Sicily, Gold Rush Town, and It Rained That Day, including seek and
+automatic queue advancement. These anonymous checks do not cover personal accounts.
