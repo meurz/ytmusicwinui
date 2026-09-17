@@ -12,3 +12,17 @@ This application reuses the following projects. Their names and trademarks belon
 | .NET runtime, libraries and ProtectedData | MIT; runtime third-party notices apply | https://github.com/dotnet/runtime |
 
 Source licenses and notices for the pinned Rust core are available in `external/core/LICENSE`, `external/core/THIRD_PARTY_NOTICES.md`, and its `vendor` directory. Published desktop packages include those notices under `licenses/core`, plus the direct packages' license texts in `licenses` and the runtime's distributed notices where supplied by its publish targets. NuGet package licenses are available on each package page linked from `docs/dependency-research.md`.
+
+## Native proof-of-origin subprocess
+
+`tools/po-provider` is a separate **GPL-3.0-only** component that reuses
+bgutil-ytdlp-pot-provider 2.0.0 (commit `37169ee2656e08c5c2e5dc9df4c598c0cb4c88a8`).
+The desktop application's MIT license does not replace its license. Distributed
+worker folders include the upstream source, worker/build source, lockfile and
+GPL license, together with dependency licenses and Node.js's license.
+
+The worker uses BgUtils 4.0.3 (MIT), JSDOM 29.1.1 (MIT),
+@napi-rs/canvas 1.0.9 (MIT, with native third-party components), and Node.js
+22.22.3 (MIT with its distributed third-party notices). See
+[the worker documentation](tools/po-provider/README.md) and its
+[upstream attribution](tools/po-provider/vendor/bgutil/UPSTREAM.md).

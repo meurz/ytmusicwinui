@@ -1,0 +1,19 @@
+{
+  "name": "ytmusicwinui-po-provider",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Isolated native PO worker using the existing BgUtils provider",
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "engines": { "node": ">=22.22.3" },
+  "scripts": { "build": "node build.mjs" },
+  "dependencies": {
+    "axios": "1.19.0",
+    "bgutils-js": "4.0.3",
+    "canvas": "npm:@napi-rs/canvas@1.0.9",
+    "jsdom": "29.1.1",
+    "proxy-agent": "8.0.2",
+    "youtubei.js": "18.0.0"
+  },
+  "devDependencies": { "esbuild": "0.27.4" }
+}

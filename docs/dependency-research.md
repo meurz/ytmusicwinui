@@ -28,3 +28,25 @@ WinUIEx, Community Toolkit, .NET and the Rust core use MIT licenses. Windows App
 ## Localization verification
 
 The MRTCore APIs above were compiled on Windows against the pinned package before integration. WinUI3Localizer 2.3.0 was also confirmed on NuGet, but the existing MRTCore dependency covers explicit language lookup and restart-based selection for this C# interface. The app supports system language selection, Simplified Chinese, Traditional Chinese and English. Language preference is stored separately from account sessions. Compiled resource lookup must be checked in the published app because source `.resw` files alone do not establish PRI packaging correctness.
+
+## Browser-free PO helper (2026-09-17)
+
+The maintained [BgUtils provider](https://github.com/Brainicism/bgutil-ytdlp-pot-provider)
+2.0.0 was evaluated before introducing another implementation. Its existing
+homepage challenge, integrity-token and video-bound minter are reused in an
+isolated GPL-3.0-only worker; the original source is vendored unchanged with its
+license. The host communicates over private standard streams and retains the
+same native Windows media player.
+
+The provider's original canvas 3.2.3 release has a Windows x64 prebuild but no
+Windows ARM64 prebuild. The existing @napi-rs/canvas 1.0.9 package supplies native
+N-API binaries for both architectures and is tested through JSDOM before use.
+Node.js 22.22.3 supplies official x64/ARM64 runtime ZIPs with pinned SHA-256 hashes.
+Dependency versions and npm integrity hashes are recorded in the helper lockfile.
+
+Anonymous research on `QoXDQa9L12A` reproduced the same AAC/Opus URL returning
+403 for a range beyond 2 MiB without a proof and 206 for all requested bytes with
+a freshly minted video-bound proof. Full AAC and Opus responses also reached their
+reported content lengths. Tokens and signed URLs remained only in memory.
+This establishes the need for a GVS proof in that sample; it does not establish
+universal availability or replace signed-in account acceptance testing.
