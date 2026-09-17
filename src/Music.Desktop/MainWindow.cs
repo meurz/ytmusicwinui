@@ -81,7 +81,7 @@ public sealed partial class MainWindow : WindowEx
         Grid.SetColumn(search, 1); toolbar.Children.Add(search); AutomationProperties.SetAutomationId(search, "SearchInput");
         var refresh = IconButton("\uE72C", L.Get("RefreshPage")); refresh.Click += async (_, _) => { if (currentView == "settings") ShowSettings(false); else if (currentView == "recent") ShowRecent(false); else await NavigateAsync(currentView, currentRequest, currentTitle, false); }; Grid.SetColumn(refresh, 2); toolbar.Children.Add(refresh);
         workspace.Children.Add(toolbar); Grid.SetRow(notice, 1); workspace.Children.Add(notice);
-        var bodyLayer = new Grid(); pageScroll.Content = pageBody; bodyLayer.Children.Add(pageScroll); loading.VerticalAlignment = VerticalAlignment.Top; bodyLayer.Children.Add(loading); Grid.SetRow(bodyLayer, 2); workspace.Children.Add(bodyLayer);
+        var bodyLayer = new Grid(); AutomationProperties.SetAutomationId(pageScroll, "PageScroll"); pageScroll.Content = pageBody; bodyLayer.Children.Add(pageScroll); loading.VerticalAlignment = VerticalAlignment.Top; bodyLayer.Children.Add(loading); Grid.SetRow(bodyLayer, 2); workspace.Children.Add(bodyLayer);
         content.Children.Add(workspace); sidePanel.Child = new ScrollViewer { Content = panelBody, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled }; Grid.SetColumn(sidePanel, 1); content.Children.Add(sidePanel);
         navigation.Content = content;
         var player = CreatePlayer(); Grid.SetRow(player, 2); layout.Children.Add(player);
@@ -155,6 +155,7 @@ public sealed partial class MainWindow : WindowEx
     private async Task NavigateAsync(string view, Dictionary<string, object?> request, string title, bool push = true)
     {
         if (core is null || closing) return;
+        pagePrefetch?.Dispose(); pagePrefetch = null;
         pageLoad?.Cancel(); pageLoad?.Dispose(); pageLoad = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
         var token = pageLoad.Token;
         if (push) history.Push((currentView, currentRequest, currentTitle));
@@ -191,7 +192,10 @@ public sealed partial class MainWindow : WindowEx
         if (currentPage is null) return;
         pageBody.Children.Clear();
         string subtitle = currentView switch { "home" => L.Get("HomeDescription"), "explore" => L.Get("ExploreDescription"), "library" => L.Get("LibraryDescription"), "likes" => L.Get("LikedMusicDescription"), "search" => L.Get("SearchResultCount", currentPage.Items.Count), _ => L.Get("ItemCount", currentPage.Items.Count) };
-        pageBody.Children.Add(Heading(currentView == "browse" || currentView == "playlist" ? string.IsNullOrWhiteSpace(currentPage.Title) ? currentTitle : currentPage.Title : currentTitle, subtitle, Eyebrow(currentView)));
+        var heading = Heading(currentView == "browse" || currentView == "playlist" ? string.IsNullOrWhiteSpace(currentPage.Title) ? currentTitle : currentPage.Title : currentTitle, subtitle, Eyebrow(currentView));
+        pageCountLabel = currentView is "search" or "playlist" or "browse" ? (TextBlock)heading.Children[2] : null;
+        if (pageCountLabel is not null) AutomationProperties.SetAutomationId(pageCountLabel, "LoadedItemCount");
+        pageBody.Children.Add(heading);
         if (currentView == "library") AddLibraryFilters();
         if (currentView == "search") AddSearchFilters();
         if (result.TryGetProperty("filters", out var filters) && filters.ValueKind == JsonValueKind.Array)
@@ -213,66 +217,18 @@ public sealed partial class MainWindow : WindowEx
             if (feature is not null) pageBody.Children.Add(FeatureCard(feature));
         }
         if (currentView is "playlist" or "browse" or "likes") AddPageActions();
-        if (currentPage.Items.Count == 0)
+        if (currentPage.Items.Count == 0 && currentPage.Continuation is null && currentPage.Sections.All(section => section.Continuation is null))
         {
             var empty = new StackPanel { Spacing = 16, Margin = new Thickness(15, 40, 15, 40), HorizontalAlignment = HorizontalAlignment.Center };
             empty.Children.Add(Icon("\uE8D6", 36, Muted)); empty.Children.Add(Text(L.Get("EmptyLibraryTitle"), 18));
             empty.Children.Add(Text(L.Get("EmptyLibraryDescription"), 12, Muted)); pageBody.Children.Add(empty);
         }
-        foreach (var section in currentPage.Sections) AddSection(section, currentView is "playlist" or "likes" || currentView == "library" && selectedLibrary == "songs");
-        if (!string.IsNullOrEmpty(currentPage.Continuation))
-        {
-            var request = new Dictionary<string, object?>(currentRequest) { ["continuation"] = currentPage.Continuation };
-            Button? more = null; more = ActionButton(L.Get("LoadMoreRecommendations"), () => AppendPageAsync(request, more), false);
-            pageBody.Children.Add(more);
-        }
+        BeginPagePrefetch();
+        pageBody.Children.Add(sectionBody);
+        foreach (var section in currentPage.Sections) AddSection(section, UseTrackRows);
+        AddFeedPrefetch(currentPage.Continuation);
+        RefreshPageItems();
         var footer = Text("ytmusicwinui  ·  YOUR MUSIC, AT YOUR PACE.", 10, Muted); footer.Margin = new Thickness(0, 14, 0, 0); pageBody.Children.Add(footer);
-    }
-
-    private void AddSection(MusicSection section, bool forceRows = false)
-    {
-        if (section.Items.Count == 0) return;
-        var block = new StackPanel { Spacing = 13 };
-        if (!string.IsNullOrWhiteSpace(section.Title)) block.Children.Add(Text(section.Title, 19));
-        bool rows = forceRows || section.Items.All(i => i.VideoId is not null);
-        block.Children.Add(rows ? TrackList(section.Items) : CardList(section.Items));
-        if (!string.IsNullOrEmpty(section.Continuation))
-        {
-            Button? more = null;
-            string endpoint = currentView == "search" ? "search" : "browse";
-            more = ActionButton(L.Get("LoadMore"), async () =>
-            {
-                var request = new Dictionary<string, object?> { ["op"] = "continue", ["endpoint"] = endpoint, ["token"] = section.Continuation };
-                await AppendPageAsync(request, more);
-            }, false);
-            block.Children.Add(more);
-        }
-        pageBody.Children.Add(block);
-    }
-
-    private async Task AppendPageAsync(Dictionary<string, object?> request, Button? trigger = null)
-    {
-        if (core is null || pageLoad is null) return;
-        var token = pageLoad.Token;
-        if (trigger is not null) trigger.IsEnabled = false;
-        try
-        {
-            var more = MusicPage.FromJson(await core.CallAsync(request, token)); token.ThrowIfCancellationRequested();
-            if (trigger?.Parent is Panel parent) parent.Children.Remove(trigger);
-            if (currentPage is not null)
-                currentPage = new MusicPage { Title = currentPage.Title, PlaylistId = currentPage.PlaylistId, Actions = currentPage.Actions,
-                    Sections = currentPage.Sections.Concat(more.Sections).ToArray(), Items = currentPage.Items.Concat(more.Items).ToArray(), Continuation = more.Continuation };
-            foreach (var section in more.Sections) AddSection(section, currentView is "playlist" or "likes");
-            if (more.Continuation is not null && request.TryGetValue("op", out var op) && op is "home" or "explore")
-            {
-                var next = new Dictionary<string, object?>(request) { ["continuation"] = more.Continuation };
-                Button? button = null; button = ActionButton(L.Get("LoadMoreRecommendations"), () => AppendPageAsync(next, button), false); pageBody.Children.Add(button);
-            }
-            if (more.Items.Count == 0) ShowNotice(L.Get("AllContentLoaded"), InfoBarSeverity.Informational);
-        }
-        catch (OperationCanceledException) { }
-        catch (Exception error) { if (!token.IsCancellationRequested) ShowError(error); }
-        finally { if (trigger is not null) trigger.IsEnabled = true; }
     }
 
     private void GoBack()
@@ -341,7 +297,7 @@ public sealed partial class MainWindow : WindowEx
     private void ShowRecent(bool push = true)
     {
         if (push) history.Push((currentView, currentRequest, currentTitle));
-        pageLoad?.Cancel(); currentPage = null; currentView = "recent"; currentTitle = L.Get("RecentTitle"); loading.Visibility = Visibility.Collapsed; backButton.IsEnabled = history.Count > 0;
+        pagePrefetch?.Dispose(); pagePrefetch = null; pageLoad?.Cancel(); currentPage = null; currentView = "recent"; currentTitle = L.Get("RecentTitle"); loading.Visibility = Visibility.Collapsed; backButton.IsEnabled = history.Count > 0;
         pageBody.Children.Clear(); pageBody.Children.Add(Heading(currentTitle, L.Get("RecentDescription"), L.Get("EyebrowRecent")));
         if (recent.Count == 0) pageBody.Children.Add(Text(L.Get("RecentEmpty"), 14, Muted)); else pageBody.Children.Add(TrackList(recent));
     }
@@ -396,7 +352,7 @@ public sealed partial class MainWindow : WindowEx
     }
     private async Task DisposeServicesAsync()
     {
-        if (closing) return; closing = true; maintenanceTimer.Stop(); lifetime.Cancel(); pageLoad?.Cancel(); suggestionLoad?.Cancel(); lyricsLoad?.Cancel();
+        if (closing) return; closing = true; pagePrefetch?.Dispose(); maintenanceTimer.Stop(); lifetime.Cancel(); pageLoad?.Cancel(); suggestionLoad?.Cancel(); lyricsLoad?.Cancel();
         try { if (playback is not null) await playback.DisposeAsync(); if (core is not null) await core.DisposeAsync(); }
         catch (Exception error) { DiagnosticLog.Write("shutdown_failure", error); }
     }

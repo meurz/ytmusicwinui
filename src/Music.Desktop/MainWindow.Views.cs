@@ -53,7 +53,7 @@ public sealed partial class MainWindow
     }
     private ListView TrackList(IEnumerable<MusicItem> source)
     {
-        var items = source.ToArray();
+        var items = source as IReadOnlyList<MusicItem> ?? source.ToArray();
         var list = new ListView { ItemsSource = items, IsItemClickEnabled = true, SelectionMode = ListViewSelectionMode.None, HorizontalAlignment = HorizontalAlignment.Stretch };
         list.ItemContainerStyle = (Style)XamlReader.Load("""
           <Style xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Padding" Value="8,7"/><Setter Property="MinHeight" Value="60"/><Setter Property="CornerRadius" Value="8"/></Style>

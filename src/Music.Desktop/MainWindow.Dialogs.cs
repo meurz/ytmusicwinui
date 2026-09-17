@@ -140,7 +140,7 @@ public sealed partial class MainWindow
         audio.Children.Add(new SettingsCard { Header = L.Get("PlaybackQueue"), Description = L.Get("QueueDescription"), HeaderIcon = Icon("\uE8FD"), Content = ActionButton(L.Get("OpenQueue"), () => { lyricsLoad?.Cancel(); panelMode = "queue"; queueButton.IsChecked = true; sidePanel.Visibility = Visibility.Visible; RenderQueue(); return Task.CompletedTask; }) });
         pageBody.Children.Add(audio);
         var about = new StackPanel { Spacing = 10 }; about.Children.Add(Text(L.Get("About"), 18));
-        about.Children.Add(new SettingsCard { Header = "ytmusicwinui", Description = $"0.1.1 · Music Core {core?.CoreVersion ?? "—"}", HeaderIcon = Icon("\uE946"), Content = ActionButton("GitHub", async () => { await Launcher.LaunchUriAsync(new Uri("https://github.com/meurz/ytmusicwinui")); }) });
+        about.Children.Add(new SettingsCard { Header = "ytmusicwinui", Description = $"0.1.2 · Music Core {core?.CoreVersion ?? "—"}", HeaderIcon = Icon("\uE946"), Content = ActionButton("GitHub", async () => { await Launcher.LaunchUriAsync(new Uri("https://github.com/meurz/ytmusicwinui")); }) });
         about.Children.Add(Text(L.Get("UnofficialDisclaimer"), 11, Muted)); pageBody.Children.Add(about);
     }
     private async Task ShowCreatePlaylistAsync()
@@ -174,37 +174,130 @@ public sealed partial class MainWindow
     }
     private async Task ShowAddToPlaylistAsync(MusicItem song)
     {
-        if (!await RequireAccountAsync() || core is null) return;
-        var first = MusicPage.FromJson(await core.CallAsync(new { op = "library", section = "playlists" }, lifetime.Token));
-        var choices = new ComboBox { PlaceholderText = L.Get("SelectPlaylist"), MinWidth = 350, HorizontalAlignment = HorizontalAlignment.Stretch };
-        var tokens = new Queue<string>(); var seenTokens = new HashSet<string>(); var seenLists = new HashSet<string>();
+        if (!await RequireAccountAsync() || core is null || string.IsNullOrWhiteSpace(song.VideoId)) return;
+        var client = core;
+        using var dialogLoad = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
+        var dialogToken = dialogLoad.Token;
+        var choices = new ListView
+        {
+            SelectionMode = ListViewSelectionMode.Single,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            IsItemClickEnabled = false
+        };
+        ScrollViewer.SetVerticalScrollMode(choices, ScrollMode.Disabled);
+        ScrollViewer.SetVerticalScrollBarVisibility(choices, ScrollBarVisibility.Disabled);
+        ScrollViewer.SetHorizontalScrollMode(choices, ScrollMode.Disabled);
+        ScrollViewer.SetHorizontalScrollBarVisibility(choices, ScrollBarVisibility.Disabled);
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(choices, L.Get("SelectPlaylist"));
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(choices, "AddToPlaylistChoices");
+        var progress = new ProgressRing { Width = 24, Height = 24, HorizontalAlignment = HorizontalAlignment.Center };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(progress, L.Get("Loading"));
+        var scrollBody = new StackPanel { Spacing = 8 };
+        scrollBody.Children.Add(choices); scrollBody.Children.Add(progress);
+        var viewport = new ScrollViewer
+        {
+            Content = scrollBody, Height = 300, VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled, HorizontalScrollMode = ScrollMode.Disabled
+        };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(viewport, "AddToPlaylistScroll");
+        var body = new StackPanel { Spacing = 12, MinWidth = 350, MaxWidth = 440 };
+        body.Children.Add(Text(song.Title, 16)); body.Children.Add(Text(L.Get("SelectPlaylist"), 12, Muted)); body.Children.Add(viewport);
+        var help = Text(L.Get("Loading"), 11, Muted); body.Children.Add(help);
+        var dialog = NewDialog(L.Get("AddToPlaylist"), body, L.Get("Add"));
+        dialog.IsPrimaryButtonEnabled = false;
+        var tokens = new Queue<string>();
+        var seenTokens = new HashSet<string>(StringComparer.Ordinal);
+        var seenLists = new HashSet<string>(StringComparer.Ordinal);
+        bool firstPageLoaded = false, isLoading = false, dialogClosed = false;
+        string? selectedPlaylistId = null;
+        int consecutiveEmptyPages = 0;
+        bool TryGetSelection(out string? id)
+        {
+            id = choices.SelectedItem is ListViewItem { IsEnabled: true, Tag: string candidate }
+                && choices.Items.Contains(choices.SelectedItem) && seenLists.Contains(candidate) ? candidate : null;
+            return !string.IsNullOrWhiteSpace(id);
+        }
         void Append(MusicPage page)
         {
             foreach (var item in page.Items)
             {
                 string? id = item.PlaylistId ?? item.BrowseId;
-                if (id is not null && item.Actions.CanEdit != false && seenLists.Add(id)) choices.Items.Add(new ComboBoxItem { Content = item.Title, Tag = id });
+                if (id?.StartsWith("VL", StringComparison.Ordinal) == true) id = id[2..];
+                if (!string.IsNullOrWhiteSpace(id) && item.Actions.CanEdit != false && seenLists.Add(id))
+                    choices.Items.Add(new ListViewItem { Content = item.Title, Tag = id });
             }
-            foreach (var section in page.Sections) if (section.Continuation is string token && seenTokens.Add(token)) tokens.Enqueue(token);
+            if (!string.IsNullOrWhiteSpace(page.Continuation) && seenTokens.Add(page.Continuation))
+                tokens.Enqueue(page.Continuation);
+            foreach (var section in page.Sections)
+                if (!string.IsNullOrWhiteSpace(section.Continuation) && seenTokens.Add(section.Continuation))
+                    tokens.Enqueue(section.Continuation);
+            help.Text = choices.Items.Count > 0 ? L.Get("EditablePlaylistNotice")
+                : tokens.Count > 0 ? L.Get("Loading") : L.Get("NoPlaylistsAvailable");
+            dialog.IsPrimaryButtonEnabled = TryGetSelection(out _);
         }
-        Append(first);
-        var body = new StackPanel { Spacing = 12 }; body.Children.Add(Text(song.Title, 16)); body.Children.Add(choices);
-        var help = Text(L.Get("EditablePlaylistNotice"), 11, Muted); body.Children.Add(help);
-        Button? moreButton = null;
-        moreButton = ActionButton(L.Get("LoadMorePlaylists"), async () =>
+        using var prefetch = new Services.ScrollPrefetcher(viewport, dialogToken, error =>
         {
-            if (!tokens.TryPeek(out string? token)) return;
-            var page = MusicPage.FromJson(await core.CallAsync(new { op = "continue", endpoint = "browse", token }, lifetime.Token)); tokens.Dequeue(); Append(page);
-            moreButton!.Visibility = tokens.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            if (dialogClosed || dialogToken.IsCancellationRequested) return;
+            DiagnosticLog.Write("playlist_picker_prefetch", error);
+            help.Text = L.Get("PageLoadFailed");
+            progress.IsActive = false;
         });
-        moreButton.Visibility = tokens.Count > 0 ? Visibility.Visible : Visibility.Collapsed; body.Children.Add(moreButton);
-        if (choices.Items.Count == 0) help.Text = tokens.Count > 0 ? L.Get("NoEditablePlaylistsOnPage") : L.Get("NoPlaylistsAvailable");
-        var dialog = NewDialog(L.Get("AddToPlaylist"), body, L.Get("Add")); dialog.IsPrimaryButtonEnabled = false; choices.SelectionChanged += (_, _) => dialog.IsPrimaryButtonEnabled = choices.SelectedItem is not null;
-        if (await ShowDialogAsync(dialog) == ContentDialogResult.Primary && choices.SelectedItem is ComboBoxItem { Tag: string id })
+        prefetch.Add(progress, async cancellation =>
         {
-            var target = MusicPage.FromJson(await core.CallAsync(new { op = "playlist", playlist_id = id }, lifetime.Token));
+            if (dialogClosed || cancellation.IsCancellationRequested) return false;
+            if (isLoading) return true;
+            if (firstPageLoaded && tokens.Count == 0) return false;
+            isLoading = true; progress.IsActive = true;
+            try
+            {
+                MusicPage page;
+                if (!firstPageLoaded)
+                    page = MusicPage.FromJson(await client.CallAsync(new { op = "library", section = "playlists" }, cancellation));
+                else
+                    page = MusicPage.FromJson(await client.CallAsync(new { op = "continue", endpoint = "browse", token = tokens.Peek() }, cancellation));
+                cancellation.ThrowIfCancellationRequested();
+                if (dialogClosed) return false;
+                if (firstPageLoaded) tokens.Dequeue();
+                firstPageLoaded = true;
+                int previousCount = choices.Items.Count;
+                Append(page);
+                consecutiveEmptyPages = choices.Items.Count > previousCount ? 0 : consecutiveEmptyPages + 1;
+                bool hasMore = tokens.Count > 0;
+                if (hasMore && consecutiveEmptyPages >= 3)
+                {
+                    DiagnosticLog.Write("playlist_picker_empty_pages", new InvalidOperationException());
+                    help.Text = L.Get("PageLoadFailed");
+                    hasMore = false;
+                }
+                progress.Visibility = hasMore ? Visibility.Visible : Visibility.Collapsed;
+                return hasMore;
+            }
+            finally { isLoading = false; if (!dialogClosed) progress.IsActive = false; }
+        });
+        choices.SelectionChanged += (_, _) =>
+        {
+            if (!dialogClosed) dialog.IsPrimaryButtonEnabled = TryGetSelection(out _);
+        };
+        dialog.PrimaryButtonClick += (_, args) =>
+        {
+            args.Cancel = !TryGetSelection(out selectedPlaylistId);
+        };
+        void StopPrefetch()
+        {
+            if (dialogClosed) return;
+            dialogClosed = true;
+            prefetch.Dispose(); dialogLoad.Cancel();
+        }
+        dialog.Closed += (_, _) => StopPrefetch();
+        ContentDialogResult result;
+        try { result = await ShowDialogAsync(dialog); }
+        finally { StopPrefetch(); }
+        if (result == ContentDialogResult.Primary && selectedPlaylistId is string playlistId && seenLists.Contains(playlistId))
+        {
+            var target = MusicPage.FromJson(await client.CallAsync(new { op = "playlist", playlist_id = playlistId }, lifetime.Token));
             if (target.Actions.CanEdit != true) { ShowNotice(L.Get("PlaylistNotEditable"), InfoBarSeverity.Warning); return; }
-            await core.CallAsync(new { op = "add_playlist_items", playlist_id = id, video_ids = new[] { song.VideoId }, allow_duplicates = false }, lifetime.Token); ShowNotice(L.Get("AddedToPlaylist"));
+            await client.CallAsync(new { op = "add_playlist_items", playlist_id = playlistId, video_ids = new[] { song.VideoId }, allow_duplicates = false }, lifetime.Token);
+            ShowNotice(L.Get("AddedToPlaylist"));
         }
     }
     private async Task RemovePlaylistEntryAsync(MusicItem song)

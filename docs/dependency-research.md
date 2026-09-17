@@ -59,3 +59,18 @@ dispatcher notifications, and owned-worker disposal passed. An anonymous library
 login requirement also left subsequent public playback usable. Actual WinUI
 checks played Sicily, Gold Rush Town, and It Rained That Day, including seek and
 automatic queue advancement. These anonymous checks do not cover personal accounts.
+
+## Automatic prefetch (2026-09-17)
+
+Reviewed the [Community Toolkit IncrementalLoadingCollection](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/windows/collections/incrementalloadingcollection)
+and the existing [WinUI ScrollViewer ViewChanged API](https://learn.microsoft.com/en-us/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.controls.scrollviewer.viewchanged?view=windows-app-sdk-1.8).
+The collection component is designed for a ListView owning a single incremental
+source. This application already composes multiple sections with independent
+opaque cursors inside one native ScrollViewer, alongside a separate feed cursor.
+It therefore retains the existing WinUI ListView/GridView and uses the outer
+ScrollViewer's viewport and layout events to request each nearby cursor.
+ObservableCollection appends results without rebuilding the page or resetting
+selection. The shared host adapter coalesces events, serializes loads, cancels
+with its view, and caps each failed cursor at three attempts. Local native
+viewport checks cover prefetch distance, short-page filling, cancellation,
+concurrency and bounded retries; no new CI checks are introduced.
