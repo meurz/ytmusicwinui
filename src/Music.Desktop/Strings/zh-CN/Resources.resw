@@ -657,4 +657,11 @@
   <data xml:space="preserve" name="CurrentAccountFormat">
     <value>当前账户：{0}</value>
   </data>
+  <data name="EyebrowWelcome" xml:space="preserve"><value>你的音乐，你的时光</value></data>
+  <data name="EyebrowHome" xml:space="preserve"><value>一点音乐，让今天更好。</value></data>
+  <data name="EyebrowExplore" xml:space="preserve"><value>听一点不一样的</value></data>
+  <data name="EyebrowLibrary" xml:space="preserve"><value>属于你的音乐世界</value></data>
+  <data name="EyebrowSearch" xml:space="preserve"><value>发现下一首最爱</value></data>
+  <data name="EyebrowRecent" xml:space="preserve"><value>最近播放</value></data>
+  <data name="EyebrowSettings" xml:space="preserve"><value>自在听歌</value></data>
 </root>

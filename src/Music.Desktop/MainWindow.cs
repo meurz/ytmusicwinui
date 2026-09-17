@@ -1,3 +1,4 @@
+using Music.Desktop.Localization;
 using System.ComponentModel;
 using System.Text.Json;
 using CommunityToolkit.WinUI.Controls;
@@ -28,27 +29,27 @@ public sealed partial class MainWindow : WindowEx
     private readonly StackPanel pageBody = new() { Spacing = 25, Margin = new Thickness(32, 10, 32, 35) };
     private readonly ScrollViewer pageScroll = new() { HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled };
     private readonly NavigationView navigation = new();
-    private readonly AutoSuggestBox search = new() { PlaceholderText = "搜索歌曲、艺人或歌单", QueryIcon = new SymbolIcon(Symbol.Find), MaxWidth = 430, MinWidth = 240, HorizontalAlignment = HorizontalAlignment.Stretch };
+    private readonly AutoSuggestBox search = new() { PlaceholderText = L.Get("SearchPlaceholder"), QueryIcon = new SymbolIcon(Symbol.Find), MaxWidth = 430, MinWidth = 240, HorizontalAlignment = HorizontalAlignment.Stretch };
     private readonly InfoBar notice = new() { IsOpen = false, IsClosable = true, Margin = new Thickness(24, 0, 24, 12) };
     private readonly ProgressBar loading = new() { IsIndeterminate = true, Visibility = Visibility.Collapsed, Height = 3 };
     private readonly Button accountButton = new() { HorizontalAlignment = HorizontalAlignment.Stretch, HorizontalContentAlignment = HorizontalAlignment.Left };
-    private readonly Button backButton = IconButton("\uE72B", "后退");
+    private readonly Button backButton = IconButton("\uE72B", L.Get("Back"));
     private readonly StackPanel panelBody = new() { Spacing = 18, Margin = new Thickness(22) };
     private readonly Border sidePanel = new() { Width = 305, Visibility = Visibility.Collapsed, Background = Card, BorderBrush = Line, BorderThickness = new Thickness(1, 0, 0, 0) };
     private readonly Stack<(string View, Dictionary<string, object?> Request, string Title)> history = new();
     private Dictionary<string, object?> currentRequest = new() { ["op"] = "home" };
-    private string currentView = "home", currentTitle = "好音乐，慢慢听。", selectedLibrary = "playlists", searchFilter = "all", panelMode = "queue";
+    private string currentView = "home", currentTitle = L.Get("HomeTitle"), selectedLibrary = "playlists", searchFilter = "all", panelMode = "queue";
     private MusicPage? currentPage;
     private readonly List<MusicItem> recent = new();
     private string? loadedLyricsVideo;
-    private readonly TextBlock lyricText = Text("选择一首歌曲查看歌词", 17, Muted);
-    private readonly TextBlock trackTitle = Text("选择一首歌，开始播放", 13);
+    private readonly TextBlock lyricText = Text(L.Get("SelectSongForLyrics"), 17, Muted);
+    private readonly TextBlock trackTitle = Text(L.Get("SelectSongToPlay"), 13);
     private readonly TextBlock trackArtist = Text("ytmusicwinui", 11, Muted);
     private readonly TextBlock playStatus = Text("", 10, Muted);
     private readonly TextBlock positionLabel = Text("0:00", 10, Muted), durationLabel = Text("0:00", 10, Muted);
     private readonly Image playerCover = new() { Width = 52, Height = 52, Stretch = Stretch.UniformToFill };
-    private readonly Button playButton = IconButton("\uE768", "播放或暂停"), likeButton = IconButton("\uEB51", "喜欢当前歌曲");
-    private readonly ToggleButton shuffleButton = ToggleIcon("\uE8B1", "随机播放"), repeatButton = ToggleIcon("\uE8EE", "循环模式"), queueButton = ToggleIcon("\uE8FD", "播放队列"), lyricsButton = ToggleIcon("\uE8A5", "歌词");
+    private readonly Button playButton = IconButton("\uE768", L.Get("PlayPause")), likeButton = IconButton("\uEB51", L.Get("LikeCurrentSong"));
+    private readonly ToggleButton shuffleButton = ToggleIcon("\uE8B1", L.Get("Shuffle")), repeatButton = ToggleIcon("\uE8EE", L.Get("RepeatMode")), queueButton = ToggleIcon("\uE8FD", L.Get("PlaybackQueue")), lyricsButton = ToggleIcon("\uE8A5", L.Get("Lyrics"));
     private readonly Slider seekSlider = new() { Minimum = 0, Maximum = 1, Value = 0, MinWidth = 140, Height = 24 };
     private readonly Slider volumeSlider = new() { Minimum = 0, Maximum = 100, Value = 70, Width = 85, Height = 28 };
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer maintenanceTimer;
@@ -60,7 +61,7 @@ public sealed partial class MainWindow : WindowEx
         Title = "ytmusicwinui"; Width = 1280; Height = 850; MinWidth = 900; MinHeight = 660;
         PersistenceId = "ytmusicwinui.MainWindow";
         ExtendsContentIntoTitleBar = true;
-        var layout = new Grid { Background = BackgroundBrush, KeyboardAcceleratorPlacementMode = KeyboardAcceleratorPlacementMode.Hidden };
+        var layout = new Grid { Language = L.LanguageTag, Background = BackgroundBrush, KeyboardAcceleratorPlacementMode = KeyboardAcceleratorPlacementMode.Hidden };
         layout.RowDefinitions.Add(new RowDefinition { Height = new GridLength(42) });
         layout.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
         layout.RowDefinitions.Add(new RowDefinition { Height = new GridLength(100) });
@@ -78,7 +79,7 @@ public sealed partial class MainWindow : WindowEx
         toolbar.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); toolbar.ColumnDefinitions.Add(new ColumnDefinition()); toolbar.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         backButton.IsEnabled = false; backButton.Click += (_, _) => GoBack(); toolbar.Children.Add(backButton);
         Grid.SetColumn(search, 1); toolbar.Children.Add(search); AutomationProperties.SetAutomationId(search, "SearchInput");
-        var refresh = IconButton("\uE72C", "刷新页面"); refresh.Click += async (_, _) => { if (currentView == "settings") ShowSettings(false); else if (currentView == "recent") ShowRecent(false); else await NavigateAsync(currentView, currentRequest, currentTitle, false); }; Grid.SetColumn(refresh, 2); toolbar.Children.Add(refresh);
+        var refresh = IconButton("\uE72C", L.Get("RefreshPage")); refresh.Click += async (_, _) => { if (currentView == "settings") ShowSettings(false); else if (currentView == "recent") ShowRecent(false); else await NavigateAsync(currentView, currentRequest, currentTitle, false); }; Grid.SetColumn(refresh, 2); toolbar.Children.Add(refresh);
         workspace.Children.Add(toolbar); Grid.SetRow(notice, 1); workspace.Children.Add(notice);
         var bodyLayer = new Grid(); pageScroll.Content = pageBody; bodyLayer.Children.Add(pageScroll); loading.VerticalAlignment = VerticalAlignment.Top; bodyLayer.Children.Add(loading); Grid.SetRow(bodyLayer, 2); workspace.Children.Add(bodyLayer);
         content.Children.Add(workspace); sidePanel.Child = new ScrollViewer { Content = panelBody, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled }; Grid.SetColumn(sidePanel, 1); content.Children.Add(sidePanel);
@@ -92,7 +93,7 @@ public sealed partial class MainWindow : WindowEx
         maintenanceTimer = DispatcherQueue.CreateTimer(); maintenanceTimer.Interval = TimeSpan.FromMinutes(10); maintenanceTimer.Tick += async (_, _) => await MaintainSessionAsync();
         Closed += (_, _) => { if (!closing) _ = DisposeServicesAsync(); };
         AppWindow.Closing += async (_, args) => { if (cleanupComplete) return; args.Cancel = true; if (closing) return; await DisposeServicesAsync(); cleanupComplete = true; Close(); };
-        pageBody.Children.Add(Heading("欢迎回来", "正在连接你的音乐…", "YOUR MUSIC, YOUR MOMENT"));
+        pageBody.Children.Add(Heading(L.Get("WelcomeBack"), L.Get("ConnectingMusic"), L.Get("EyebrowWelcome")));
         _ = InitializeAsync();
     }
 
@@ -100,14 +101,15 @@ public sealed partial class MainWindow : WindowEx
     {
         navigation.PaneDisplayMode = NavigationViewPaneDisplayMode.Left;
         navigation.OpenPaneLength = 210; navigation.CompactPaneLength = 48; navigation.IsBackButtonVisible = NavigationViewBackButtonVisible.Collapsed;
+        navigation.Loaded += (_, _) => { if (navigation.SettingsItem is NavigationViewItem settings) settings.Content = L.Get("Settings"); };
         navigation.IsPaneToggleButtonVisible = false; navigation.IsSettingsVisible = true; navigation.AlwaysShowHeader = false;
-        navigation.MenuItems.Add(NavItem("首页", "\uE80F", "home"));
-        navigation.MenuItems.Add(NavItem("发现", "\uE707", "explore"));
-        navigation.MenuItems.Add(NavItem("音乐库", "\uE8F1", "library"));
+        navigation.MenuItems.Add(NavItem(L.Get("Home"), "\uE80F", "home"));
+        navigation.MenuItems.Add(NavItem(L.Get("Explore"), "\uE707", "explore"));
+        navigation.MenuItems.Add(NavItem(L.Get("Library"), "\uE8F1", "library"));
         navigation.MenuItems.Add(new NavigationViewItemSeparator());
-        navigation.MenuItems.Add(new NavigationViewItemHeader { Content = "我的收藏" });
-        navigation.MenuItems.Add(NavItem("喜欢的音乐", "\uEB51", "likes"));
-        navigation.MenuItems.Add(NavItem("最近播放", "\uE81C", "recent"));
+        navigation.MenuItems.Add(new NavigationViewItemHeader { Content = L.Get("MyCollection") });
+        navigation.MenuItems.Add(NavItem(L.Get("LikedMusic"), "\uEB51", "likes"));
+        navigation.MenuItems.Add(NavItem(L.Get("RecentlyPlayed"), "\uE81C", "recent"));
         navigation.SelectedItem = navigation.MenuItems[0];
         navigation.ItemInvoked += async (_, args) =>
         {
@@ -116,15 +118,15 @@ public sealed partial class MainWindow : WindowEx
             {
                 switch (view)
                 {
-                    case "home": await NavigateAsync(view, new() { ["op"] = "home" }, "好音乐，慢慢听。"); break;
-                    case "explore": await NavigateAsync(view, new() { ["op"] = "explore" }, "发现新的心动"); break;
+                    case "home": await NavigateAsync(view, new() { ["op"] = "home" }, L.Get("HomeTitle")); break;
+                    case "explore": await NavigateAsync(view, new() { ["op"] = "explore" }, L.Get("ExploreTitle")); break;
                     case "library": await LoadLibraryAsync(selectedLibrary); break;
-                    case "likes": await NavigateAsync("likes", new() { ["op"] = "library", ["section"] = "likes" }, "喜欢的音乐"); break;
+                    case "likes": await NavigateAsync("likes", new() { ["op"] = "library", ["section"] = "likes" }, L.Get("LikedMusic")); break;
                     case "recent": ShowRecent(); break;
                 }
             }
         };
-        accountButton.Content = Horizontal(Icon("\uE77B", 18), Text("导入账户", 12));
+        accountButton.Content = Horizontal(Icon("\uE77B", 18), Text(L.Get("ImportAccount"), 12));
         accountButton.Click += async (_, _) => { if (core?.IsAuthenticated == true) await ShowAccountDialogAsync(); else await ShowImportDialogAsync(); };
         accountButton.Margin = new Thickness(10, 12, 10, 18); accountButton.Background = Card;
         navigation.PaneFooter = accountButton;
@@ -135,15 +137,15 @@ public sealed partial class MainWindow : WindowEx
         loading.Visibility = Visibility.Visible;
         try
         {
-            core = await CoreService.CreateAsync(lifetime.Token);
+            core = await CoreService.CreateAsync(lifetime.Token, L.LanguageTag);
             if (closing) { await core.DisposeAsync(); return; }
-            playback = new PlaybackService(core, DispatcherQueue);
+            playback = new PlaybackService(core, DispatcherQueue, key => L.Get(key));
             playback.Volume = volumeSlider.Value / 100;
             playback.PropertyChanged += PlaybackChanged;
             playback.Queue.CollectionChanged += (_, _) => { if (panelMode == "queue" && sidePanel.Visibility == Visibility.Visible) RenderQueue(); };
             UpdateAccountButton(); maintenanceTimer.Start();
-            await NavigateAsync("home", new() { ["op"] = "home" }, "好音乐，慢慢听。", false);
-            if (core.SessionStatus is "rejected" or "restore_failed") ShowNotice("保存的会话暂不可用，请重新导入。你仍可以搜索公开音乐。", InfoBarSeverity.Warning);
+            await NavigateAsync("home", new() { ["op"] = "home" }, L.Get("HomeTitle"), false);
+            if (core.SessionStatus is "rejected" or "restore_failed") ShowNotice(L.Get("SavedSessionUnavailable"), InfoBarSeverity.Warning);
         }
         catch (OperationCanceledException) { }
         catch (Exception error) { ShowError(error); RenderWelcome(); }
@@ -158,7 +160,7 @@ public sealed partial class MainWindow : WindowEx
         if (push) history.Push((currentView, currentRequest, currentTitle));
         currentView = view; currentRequest = new(request); currentTitle = title; currentPage = null;
         backButton.IsEnabled = history.Count > 0; notice.IsOpen = false; loading.Visibility = Visibility.Visible;
-        pageBody.Children.Clear(); pageBody.Children.Add(Heading(title, "正在加载…", Eyebrow(view)));
+        pageBody.Children.Clear(); pageBody.Children.Add(Heading(title, L.Get("Loading"), Eyebrow(view)));
         pageScroll.ChangeView(null, 0, null);
         try
         {
@@ -174,8 +176,8 @@ public sealed partial class MainWindow : WindowEx
         catch (Exception error)
         {
             if (token.IsCancellationRequested) return;
-            pageBody.Children.Clear(); pageBody.Children.Add(Heading(title, "暂时无法加载此页面", Eyebrow(view)));
-            var retry = ActionButton("重新加载", async () => await NavigateAsync(view, request, title, false), true);
+            pageBody.Children.Clear(); pageBody.Children.Add(Heading(title, L.Get("PageLoadFailed"), Eyebrow(view)));
+            var retry = ActionButton(L.Get("Reload"), async () => await NavigateAsync(view, request, title, false), true);
             pageBody.Children.Add(retry);
             if (core.IsAuthenticated == false && (view == "library" || view == "likes" || view == "home")) RenderSignInCard();
             ShowError(error);
@@ -187,7 +189,7 @@ public sealed partial class MainWindow : WindowEx
     {
         if (currentPage is null) return;
         pageBody.Children.Clear();
-        string subtitle = currentView switch { "home" => "从一首喜欢的歌，开始今天。", "explore" => "熟悉的旋律之外，还有新的风景。", "library" => "把每一次心动，好好收藏。", "likes" => "所有让你按下喜欢的瞬间，都在这里。", "search" => $"搜索结果 · {currentPage.Items.Count} 项", _ => $"{currentPage.Items.Count} 项" };
+        string subtitle = currentView switch { "home" => L.Get("HomeDescription"), "explore" => L.Get("ExploreDescription"), "library" => L.Get("LibraryDescription"), "likes" => L.Get("LikedMusicDescription"), "search" => L.Get("SearchResultCount", currentPage.Items.Count), _ => L.Get("ItemCount", currentPage.Items.Count) };
         pageBody.Children.Add(Heading(currentView == "browse" || currentView == "playlist" ? string.IsNullOrWhiteSpace(currentPage.Title) ? currentTitle : currentPage.Title : currentTitle, subtitle, Eyebrow(currentView)));
         if (currentView == "library") AddLibraryFilters();
         if (currentView == "search") AddSearchFilters();
@@ -213,14 +215,14 @@ public sealed partial class MainWindow : WindowEx
         if (currentPage.Items.Count == 0)
         {
             var empty = new StackPanel { Spacing = 16, Margin = new Thickness(15, 40, 15, 40), HorizontalAlignment = HorizontalAlignment.Center };
-            empty.Children.Add(Icon("\uE8D6", 36, Muted)); empty.Children.Add(Text("这里还没有音乐", 18));
-            empty.Children.Add(Text("试试搜索喜欢的歌曲，或选择另一个分类。", 12, Muted)); pageBody.Children.Add(empty);
+            empty.Children.Add(Icon("\uE8D6", 36, Muted)); empty.Children.Add(Text(L.Get("EmptyLibraryTitle"), 18));
+            empty.Children.Add(Text(L.Get("EmptyLibraryDescription"), 12, Muted)); pageBody.Children.Add(empty);
         }
         foreach (var section in currentPage.Sections) AddSection(section, currentView is "playlist" or "likes" || currentView == "library" && selectedLibrary == "songs");
         if (!string.IsNullOrEmpty(currentPage.Continuation))
         {
             var request = new Dictionary<string, object?>(currentRequest) { ["continuation"] = currentPage.Continuation };
-            Button? more = null; more = ActionButton("加载更多推荐", () => AppendPageAsync(request, more), false);
+            Button? more = null; more = ActionButton(L.Get("LoadMoreRecommendations"), () => AppendPageAsync(request, more), false);
             pageBody.Children.Add(more);
         }
         var footer = Text("ytmusicwinui  ·  YOUR MUSIC, AT YOUR PACE.", 10, Muted); footer.Margin = new Thickness(0, 14, 0, 0); pageBody.Children.Add(footer);
@@ -237,7 +239,7 @@ public sealed partial class MainWindow : WindowEx
         {
             Button? more = null;
             string endpoint = currentView == "search" ? "search" : "browse";
-            more = ActionButton("加载更多", async () =>
+            more = ActionButton(L.Get("LoadMore"), async () =>
             {
                 var request = new Dictionary<string, object?> { ["op"] = "continue", ["endpoint"] = endpoint, ["token"] = section.Continuation };
                 await AppendPageAsync(request, more);
@@ -263,9 +265,9 @@ public sealed partial class MainWindow : WindowEx
             if (more.Continuation is not null && request.TryGetValue("op", out var op) && op is "home" or "explore")
             {
                 var next = new Dictionary<string, object?>(request) { ["continuation"] = more.Continuation };
-                Button? button = null; button = ActionButton("加载更多推荐", () => AppendPageAsync(next, button), false); pageBody.Children.Add(button);
+                Button? button = null; button = ActionButton(L.Get("LoadMoreRecommendations"), () => AppendPageAsync(next, button), false); pageBody.Children.Add(button);
             }
-            if (more.Items.Count == 0) ShowNotice("已加载全部内容", InfoBarSeverity.Informational);
+            if (more.Items.Count == 0) ShowNotice(L.Get("AllContentLoaded"), InfoBarSeverity.Informational);
         }
         catch (OperationCanceledException) { }
         catch (Exception error) { if (!token.IsCancellationRequested) ShowError(error); }
@@ -286,22 +288,22 @@ public sealed partial class MainWindow : WindowEx
     private async Task LoadLibraryAsync(string section)
     {
         selectedLibrary = section;
-        await NavigateAsync("library", new() { ["op"] = "library", ["section"] = section }, "你的音乐，自成一片。");
+        await NavigateAsync("library", new() { ["op"] = "library", ["section"] = section }, L.Get("LibraryTitle"));
     }
     private void AddLibraryFilters()
     {
         var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
-        foreach (var (name, key) in new[] { ("歌单", "playlists"), ("歌曲", "songs"), ("专辑", "albums"), ("艺人", "artists"), ("订阅", "subscriptions") })
+        foreach (var (name, key) in new[] { (L.Get("Playlists"), "playlists"), (L.Get("Songs"), "songs"), (L.Get("Albums"), "albums"), (L.Get("Artists"), "artists"), (L.Get("Subscriptions"), "subscriptions") })
         {
             var button = new ToggleButton { Content = name, IsChecked = selectedLibrary == key };
             button.Click += async (_, _) => await LoadLibraryAsync(key); row.Children.Add(button);
         }
-        row.Children.Add(ActionButton("＋ 新建歌单", ShowCreatePlaylistAsync, false)); pageBody.Children.Add(HorizontalScroll(row));
+        row.Children.Add(ActionButton(L.Get("NewPlaylistShortcut"), ShowCreatePlaylistAsync, false)); pageBody.Children.Add(HorizontalScroll(row));
     }
     private void AddSearchFilters()
     {
         var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
-        foreach (var (name, key) in new[] { ("全部", "all"), ("歌曲", "songs"), ("视频", "videos"), ("专辑", "albums"), ("艺人", "artists"), ("歌单", "playlists") })
+        foreach (var (name, key) in new[] { (L.Get("All"), "all"), (L.Get("Songs"), "songs"), (L.Get("Videos"), "videos"), (L.Get("Albums"), "albums"), (L.Get("Artists"), "artists"), (L.Get("Playlists"), "playlists") })
         {
             var button = new ToggleButton { Content = name, IsChecked = searchFilter == key };
             button.Click += async (_, _) => { searchFilter = key; await NavigateAsync("search", new() { ["op"] = "search", ["query"] = currentRequest["query"], ["filter"] = key }, currentTitle, false); }; row.Children.Add(button);
@@ -329,7 +331,7 @@ public sealed partial class MainWindow : WindowEx
     {
         if (item.VideoId is not null)
         {
-            if (item.Available == false) { ShowNotice("这首歌曲目前不可播放", InfoBarSeverity.Warning); return; }
+            if (item.Available == false) { ShowNotice(L.Get("SongUnavailable"), InfoBarSeverity.Warning); return; }
             if (playback is not null) await playback.PlayAsync(item, context);
         }
         else if (item.PlaylistId is not null) await NavigateAsync("playlist", new() { ["op"] = "playlist", ["playlist_id"] = item.PlaylistId }, item.Title);
@@ -338,20 +340,20 @@ public sealed partial class MainWindow : WindowEx
     private void ShowRecent(bool push = true)
     {
         if (push) history.Push((currentView, currentRequest, currentTitle));
-        pageLoad?.Cancel(); currentPage = null; currentView = "recent"; currentTitle = "让旋律，再来一遍。"; loading.Visibility = Visibility.Collapsed; backButton.IsEnabled = history.Count > 0;
-        pageBody.Children.Clear(); pageBody.Children.Add(Heading(currentTitle, "本次打开应用时听过的音乐", "RECENTLY PLAYED"));
-        if (recent.Count == 0) pageBody.Children.Add(Text("播放一首歌，它就会出现在这里。", 14, Muted)); else pageBody.Children.Add(TrackList(recent));
+        pageLoad?.Cancel(); currentPage = null; currentView = "recent"; currentTitle = L.Get("RecentTitle"); loading.Visibility = Visibility.Collapsed; backButton.IsEnabled = history.Count > 0;
+        pageBody.Children.Clear(); pageBody.Children.Add(Heading(currentTitle, L.Get("RecentDescription"), L.Get("EyebrowRecent")));
+        if (recent.Count == 0) pageBody.Children.Add(Text(L.Get("RecentEmpty"), 14, Muted)); else pageBody.Children.Add(TrackList(recent));
     }
     private void RenderWelcome()
     {
-        pageBody.Children.Clear(); pageBody.Children.Add(Heading("欢迎使用 ytmusicwinui", "搜索公开音乐，或导入账户查看个人音乐库。", "YOUR MUSIC, YOUR MOMENT"));
-        pageBody.Children.Add(ActionButton("重试连接", InitializeAsync, true));
+        pageBody.Children.Clear(); pageBody.Children.Add(Heading(L.Get("WelcomeTitle"), L.Get("WelcomeDescription"), L.Get("EyebrowWelcome")));
+        pageBody.Children.Add(ActionButton(L.Get("RetryConnection"), InitializeAsync, true));
     }
     private void RenderSignInCard()
     {
         var content = new StackPanel { Spacing = 15 };
-        content.Children.Add(Text("把你的音乐，带到这里。", 22)); content.Children.Add(Text("导入已登录的 YouTube Music 会话，即可查看歌单和收藏。", 13, Muted));
-        content.Children.Add(ActionButton("导入账户", ShowImportDialogAsync, true));
+        content.Children.Add(Text(L.Get("ImportCardTitle"), 22)); content.Children.Add(Text(L.Get("ImportCardDescription"), 13, Muted));
+        content.Children.Add(ActionButton(L.Get("ImportAccount"), ShowImportDialogAsync, true));
         pageBody.Children.Add(new Border { Background = Card, BorderBrush = Line, BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(13), Padding = new Thickness(26), Child = content });
     }
 
@@ -367,21 +369,21 @@ public sealed partial class MainWindow : WindowEx
         DiagnosticLog.Write("operation_failure", error); UpdateAccountButton();
         string message = error is MusicCoreException music ? music.Code switch
         {
-            "authentication_required" => "请先导入账户，再访问你的音乐库。",
-            "authentication_rejected" => "账户会话已失效，请重新导入已登录的会话。",
-            "timeout" => "连接超时，请稍后重试。首次准备播放可能需要更长时间。",
-            "rate_limited" => "请求暂时过于频繁，请稍后再试。",
-            "mutation_outcome_unknown" => "服务器可能已保存这次修改。请刷新核对，不要重复提交。",
-            "po_token_required" or "attestation_required" => "这首歌曲需要额外的网页验证，当前原生客户端暂时无法播放。",
-            "lyrics_unavailable" => "这首歌曲暂时没有可用歌词。",
-            "network" or "http" => "网络暂时不可用，请检查连接后重试。",
-            _ => $"操作未完成（{SafeCode(music.Code)}）。请刷新页面后重试。"
-        } : error is DllNotFoundException or BadImageFormatException ? "未找到匹配的音乐核心，请使用完整的 Windows 发布包。" : "操作未完成，请稍后重试。";
+            "authentication_required" => L.Get("AccountRequired"),
+            "authentication_rejected" => L.Get("SessionExpired"),
+            "timeout" => L.Get("ConnectionTimeout"),
+            "rate_limited" => L.Get("RateLimited"),
+            "mutation_outcome_unknown" => L.Get("MutationOutcomeUnknown"),
+            "po_token_required" or "attestation_required" => L.Get("WebVerificationRequired"),
+            "lyrics_unavailable" => L.Get("LyricsUnavailable"),
+            "network" or "http" => L.Get("NetworkUnavailable"),
+            _ => L.Get("OperationFailedCode", SafeCode(music.Code))
+        } : error is DllNotFoundException or BadImageFormatException ? L.Get("CoreNotFound") : L.Get("OperationFailed");
         ShowNotice(message, InfoBarSeverity.Warning);
     }
     private static string SafeCode(string code) => code.Length <= 60 && code.All(c => char.IsAsciiLetterOrDigit(c) || c == '_') ? code : "unknown";
     private void ShowNotice(string message, InfoBarSeverity severity = InfoBarSeverity.Informational) { if (closing) return; notice.Message = message; notice.Severity = severity; notice.IsOpen = true; }
-    private void UpdateAccountButton() => accountButton.Content = Horizontal(Icon("\uE77B", 18), Text(core?.IsAuthenticated == true ? core.AccountName : "导入账户", 12));
+    private void UpdateAccountButton() => accountButton.Content = Horizontal(Icon("\uE77B", 18), Text(core?.IsAuthenticated == true ? core.AccountName : L.Get("ImportAccount"), 12));
     private async Task MaintainSessionAsync()
     {
         if (core?.IsAuthenticated != true || refreshingSession || closing || playback?.IsBusy == true) return;
@@ -409,7 +411,7 @@ public sealed partial class MainWindow : WindowEx
     private static ScrollViewer HorizontalScroll(UIElement content) => new() { Content = content, HorizontalScrollBarVisibility = ScrollBarVisibility.Auto, VerticalScrollBarVisibility = ScrollBarVisibility.Disabled, HorizontalScrollMode = ScrollMode.Enabled, VerticalScrollMode = ScrollMode.Disabled };
     private static NavigationViewItem NavItem(string label, string glyph, string key) { var item = new NavigationViewItem { Content = label, Icon = new FontIcon { Glyph = glyph }, Tag = key }; AutomationProperties.SetAutomationId(item, "Nav-" + key); return item; }
     private static string? JsonString(JsonElement element, string name) => element.ValueKind == JsonValueKind.Object && element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
-    private static string Eyebrow(string view) => view switch { "home" => "A LITTLE MUSIC. A BETTER DAY.", "explore" => "A LITTLE OUTSIDE YOUR USUAL", "library" => "YOUR OWN LITTLE UNIVERSE", "search" => "FIND YOUR NEXT FAVORITE", _ => "YOUR MUSIC, YOUR MOMENT" };
+    private static string Eyebrow(string view) => view switch { "home" => L.Get("EyebrowHome"), "explore" => L.Get("EyebrowExplore"), "library" => L.Get("EyebrowLibrary"), "search" => L.Get("EyebrowSearch"), _ => L.Get("EyebrowWelcome") };
     private static StackPanel Heading(string title, string subtitle, string eyebrow) { var p = new StackPanel { Spacing = 9 }; var eye = Text(eyebrow, 10, Muted); eye.CharacterSpacing = 160; p.Children.Add(eye); p.Children.Add(Text(title, 30)); p.Children.Add(Text(subtitle, 12, Muted)); return p; }
     private static void SetImage(Image image, string? url) { image.Source = Uri.TryCreate(url, UriKind.Absolute, out var uri) && (uri.Scheme == "https" || uri.Scheme == "ms-appx") ? new BitmapImage(uri) : null; }
 }

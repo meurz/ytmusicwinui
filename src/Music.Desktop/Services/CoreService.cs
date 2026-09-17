@@ -9,15 +9,17 @@ public sealed class CoreService : IAsyncDisposable
 {
     private readonly SemaphoreSlim gate = new(1, 1);
     private readonly SessionStore store;
+    private readonly string language;
     private MusicCoreClient client;
     private readonly MusicCoreClient anonymousClient;
     private bool disposed;
 
-    private CoreService(MusicCoreClient client, SessionStore store)
+    private CoreService(MusicCoreClient client, SessionStore store, string language)
     {
         this.client = client;
         anonymousClient = client;
         this.store = store;
+        this.language = language;
     }
 
     public bool IsAuthenticated { get; private set; }
@@ -25,10 +27,10 @@ public sealed class CoreService : IAsyncDisposable
     public string CoreVersion { get; private set; } = "";
     public string SessionStatus { get; private set; } = "signed_out";
 
-    public static async Task<CoreService> CreateAsync(CancellationToken cancellation = default)
+    public static async Task<CoreService> CreateAsync(CancellationToken cancellation = default, string language = "en-US")
     {
-        MusicCoreClient anonymous = await MusicCoreClient.CreateAsync(DefaultConfig(), cancellation).ConfigureAwait(false);
-        var service = new CoreService(anonymous, new SessionStore());
+        MusicCoreClient anonymous = await MusicCoreClient.CreateAsync(DefaultConfig(language), cancellation).ConfigureAwait(false);
+        var service = new CoreService(anonymous, new SessionStore(), language);
         try
         {
             JsonElement capabilities = await anonymous.CallAsync("{\"op\":\"capabilities\"}", cancellation).ConfigureAwait(false);
@@ -81,7 +83,7 @@ public sealed class CoreService : IAsyncDisposable
             ThrowIfDisposed();
             candidate = await MusicCoreClient.CreateAsync(JsonSerializer.Serialize(new
             {
-                language = "zh-CN", country = "TW", playback_client = "web_remix", cookie
+                language, country = "TW", playback_client = "web_remix", cookie
             }), cancellation).ConfigureAwait(false);
             JsonElement account = await VerifyAsync(candidate, cancellation).ConfigureAwait(false);
             await PersistAsync(candidate, cancellation).ConfigureAwait(false);
@@ -175,7 +177,7 @@ public sealed class CoreService : IAsyncDisposable
             using JsonDocument document = JsonDocument.Parse(saved);
             var config = new Dictionary<string, object?>
             {
-                ["language"] = "zh-CN", ["country"] = "TW", ["playback_client"] = "web_remix"
+                ["language"] = language, ["country"] = "TW", ["playback_client"] = "web_remix"
             };
             foreach (string field in new[] { "cookie", "cookie_expirations", "auth_user", "delegated_session_id" })
                 if (document.RootElement.TryGetProperty(field, out var value)) config[field] = value;
@@ -231,7 +233,7 @@ public sealed class CoreService : IAsyncDisposable
         SessionStatus = status;
     }
 
-    private static string DefaultConfig() => "{\"language\":\"zh-CN\",\"country\":\"TW\",\"playback_client\":\"web_remix\"}";
+    private static string DefaultConfig(string language) => JsonSerializer.Serialize(new { language, country = "TW", playback_client = "web_remix" });
 
     private static bool IsStorageError(Exception error) => error is IOException or UnauthorizedAccessException or CryptographicException;
 

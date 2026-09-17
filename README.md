@@ -20,6 +20,8 @@ Get-FileHash .\ytmusicwinui-win-x64.zip -Algorithm SHA256
 
 The client provides native navigation, search and suggestions, paged library and playlist browsing, playlist creation/rename/deletion and song actions, a persistent player, queue and lyrics surfaces, and account/session settings. Feature availability also depends on the signed-in account and the core response. No browser is embedded for audio playback.
 
+The interface supports English, Simplified Chinese and Traditional Chinese through Windows MRTCore resources. It follows the system language by default (English fallback). Change the language in Settings and restart the app to apply it; song titles and other service content retain their original text.
+
 ## Build
 
 Install the .NET 9 SDK and the Windows SDK / Windows application development tools (Visual Studio 2022). Build from a local Windows drive rather than a WSL UNC path.

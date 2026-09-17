@@ -657,4 +657,11 @@
   <data xml:space="preserve" name="CurrentAccountFormat">
     <value>Current account: {0}</value>
   </data>
+  <data name="EyebrowWelcome" xml:space="preserve"><value>YOUR MUSIC, YOUR MOMENT</value></data>
+  <data name="EyebrowHome" xml:space="preserve"><value>A LITTLE MUSIC. A BETTER DAY.</value></data>
+  <data name="EyebrowExplore" xml:space="preserve"><value>A LITTLE OUTSIDE YOUR USUAL</value></data>
+  <data name="EyebrowLibrary" xml:space="preserve"><value>YOUR OWN LITTLE UNIVERSE</value></data>
+  <data name="EyebrowSearch" xml:space="preserve"><value>FIND YOUR NEXT FAVORITE</value></data>
+  <data name="EyebrowRecent" xml:space="preserve"><value>RECENTLY PLAYED</value></data>
+  <data name="EyebrowSettings" xml:space="preserve"><value>MAKE YOURSELF AT HOME</value></data>
 </root>
