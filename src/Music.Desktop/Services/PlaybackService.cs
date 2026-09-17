@@ -4,11 +4,12 @@ using Microsoft.UI.Dispatching;
 using Music.Desktop.Models;
 using Windows.Media;
 using Windows.Media.Playback;
+using Windows.Media.Core;
 using YouTubeMusic.Interop;
 
 namespace Music.Desktop.Services;
 
-/// <summary>Native AAC/DASH playback. Signed descriptors exist only for the active source.</summary>
+/// <summary>Native AAC/DASH playback with one Opus alternative. Signed URLs remain in memory only.</summary>
 public sealed class PlaybackService : ObservableObject, IAsyncDisposable
 {
     private readonly CoreService core;
@@ -19,6 +20,10 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
     private readonly object tasksLock = new();
     private readonly HashSet<Task> pendingLoads = [];
     private WindowsMusicSource? source;
+    private MediaSource? directSource;
+    private bool usingWebm;
+    private bool webmAttempted;
+    private bool HasSource => source is not null || directSource is not null;
     private CancellationTokenSource? loadCancellation;
     private long generation;
     private bool disposed;
@@ -109,7 +114,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
     public void TogglePlayPause() => Post(() =>
     {
         if (IsBusy) { playWhenOpened = !playWhenOpened; return; }
-        if (source is null) return;
+        if (!HasSource) return;
         playWhenOpened = !IsPlaying;
         if (IsPlaying) player.Pause(); else player.Play();
     });
@@ -117,7 +122,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
     public Task NextAsync() => Track(OnUiAsync(() => MoveAsync(1, false)));
     public Task PreviousAsync() => Track(OnUiAsync(() =>
     {
-        if (PositionSeconds > 3 && source is not null) { Seek(0); return Task.CompletedTask; }
+        if (PositionSeconds > 3 && HasSource) { Seek(0); return Task.CompletedTask; }
         return MoveAsync(-1, false);
     }));
 
@@ -131,7 +136,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
         if (!double.IsFinite(seconds)) return;
         double position = Math.Clamp(seconds, 0, DurationSeconds > 0 ? DurationSeconds : double.MaxValue);
         if (IsBusy) { pendingSeek = position; return; }
-        if (source is null || !player.PlaybackSession.CanSeek) return;
+        if (!HasSource || !player.PlaybackSession.CanSeek) return;
         player.PlaybackSession.Position = TimeSpan.FromSeconds(position);
         PositionSeconds = position;
         UpdateTimeline();
@@ -167,7 +172,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
         finally { await OnUiAsync(() => { stopping = closing; return Task.CompletedTask; }); }
     }
 
-    private async Task LoadAsync(MusicItem item, bool refresh, double seek, bool autoPlay)
+    private async Task LoadAsync(MusicItem item, bool refresh, double seek, bool autoPlay, bool webm = false)
     {
         long requestGeneration = ++generation;
         loadCancellation?.Cancel();
@@ -180,25 +185,50 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
         IsBusy = true;
         pendingSeek = seek;
         playWhenOpened = autoPlay;
-        if (!refresh) recoveryAttempted = false;
-        StatusText = refresh ? "正在重新获取播放源…" : "正在准备音频…";
+        usingWebm = webm;
+        if (!refresh && !webm) { recoveryAttempted = false; webmAttempted = false; }
+        StatusText = webm ? "正在尝试 Opus 音频…" : refresh ? "正在重新获取播放源…" : "正在准备音频…";
         WindowsMusicSource? replacement = null;
+        MediaSource? directReplacement = null;
         try
         {
             if (refresh)
                 await core.CallAsync(new { op = "stream_refresh", video_id = item.VideoId, format = "mp4" }, cancellation.Token);
-            var manifest = await core.CallAsync(new { op = "dash_manifest", video_id = item.VideoId }, cancellation.Token);
-            replacement = await WindowsMusicSource.FromManifestAsync(manifest, cancellation.Token);
+            if (webm)
+            {
+                // The core validates a fresh public CDN URL. No account cookies enter MediaPlayer.
+                var stream = await core.CallAsync(new { op = "stream", video_id = item.VideoId, format = "webm" }, cancellation.Token);
+                if (!Uri.TryCreate(stream.GetProperty("url").GetString(), UriKind.Absolute, out var uri)
+                    || uri.Scheme != Uri.UriSchemeHttps || !uri.Host.EndsWith(".googlevideo.com", StringComparison.OrdinalIgnoreCase))
+                    throw new MusicCoreException("media_source", "Invalid public media URL");
+                directReplacement = MediaSource.CreateFromUri(uri);
+            }
+            else
+            {
+                var manifest = await core.CallAsync(new { op = "dash_manifest", video_id = item.VideoId }, cancellation.Token);
+                replacement = await WindowsMusicSource.FromManifestAsync(manifest, cancellation.Token);
+            }
             cancellation.Token.ThrowIfCancellationRequested();
             // Discard any success racing with cancellation, account change or a newer selection.
             if (disposed || requestGeneration != generation) return;
             source = replacement;
+            directSource = directReplacement;
             replacement = null;
-            player.Source = source.Source;
+            directReplacement = null;
+            player.Source = source?.Source ?? directSource;
             UpdateMetadata(item);
             StatusText = "正在加载音频…";
         }
         catch (OperationCanceledException) { }
+        catch (Exception error) when (!webm && !webmAttempted &&
+            (error is NotSupportedException || error is MusicCoreException { Code: "stream_unavailable" }))
+        {
+            if (!disposed && requestGeneration == generation)
+            {
+                webmAttempted = true;
+                await LoadAsync(item, false, seek, autoPlay, webm: true);
+            }
+        }
         catch (Exception error)
         {
             if (!disposed && requestGeneration == generation)
@@ -210,11 +240,12 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
         finally
         {
             replacement?.Dispose();
+            directReplacement?.Dispose();
             if (requestGeneration == generation)
             {
                 loadCancellation = null;
                 // MediaOpened clears the busy state after native initialization succeeds.
-                if (source is null) IsBusy = false;
+                if (!HasSource) IsBusy = false;
             }
         }
     }
@@ -249,7 +280,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
         long observed = generation;
         Post(() =>
         {
-            if (observed != generation || source is null) return;
+            if (observed != generation || !HasSource) return;
             IsBusy = false;
             DurationSeconds = Math.Max(0, player.PlaybackSession.NaturalDuration.TotalSeconds);
             if (pendingSeek > 0 && player.PlaybackSession.CanSeek)
@@ -272,15 +303,21 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
         long observed = generation;
         Observe(Track(OnUiAsync(() =>
         {
-            if (stopping || closing || observed != generation || source is null || Current is null) return Task.CompletedTask;
+            if (stopping || closing || observed != generation || !HasSource || Current is null) return Task.CompletedTask;
             // Media Foundation can report CDN HTTP 401/403 as DecodingError.
             int failureCode = args.ExtendedErrorCode?.HResult ?? 0;
             bool rejectedUrl = failureCode is unchecked((int)0x80190191) or unchecked((int)0x80190193);
-            if (!recoveryAttempted && (args.Error == MediaPlayerError.NetworkError || rejectedUrl))
+            if (!usingWebm && !recoveryAttempted && (args.Error == MediaPlayerError.NetworkError || rejectedUrl))
             {
                 recoveryAttempted = true;
                 double resume = Math.Max(PositionSeconds, player.PlaybackSession.Position.TotalSeconds);
                 return LoadAsync(Current, true, resume, IsPlaying || playWhenOpened);
+            }
+            if (!usingWebm && !webmAttempted && (rejectedUrl || args.Error is MediaPlayerError.DecodingError or MediaPlayerError.SourceNotSupported))
+            {
+                webmAttempted = true;
+                double resume = Math.Max(PositionSeconds, player.PlaybackSession.Position.TotalSeconds);
+                return LoadAsync(Current, false, resume, IsPlaying || playWhenOpened, webm: true);
             }
             DetachSource();
             IsBusy = false;
@@ -297,7 +334,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
 
     private void PlaybackStateChanged(MediaPlaybackSession sender, object args) => Post(() =>
     {
-        IsPlaying = source is not null && sender.PlaybackState == MediaPlaybackState.Playing;
+        IsPlaying = HasSource && sender.PlaybackState == MediaPlaybackState.Playing;
         systemControls.PlaybackStatus = sender.PlaybackState switch
         {
             MediaPlaybackState.Playing => MediaPlaybackStatus.Playing,
@@ -305,13 +342,13 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
             MediaPlaybackState.Opening or MediaPlaybackState.Buffering => MediaPlaybackStatus.Changing,
             _ => MediaPlaybackStatus.Stopped
         };
-        if (!IsBusy && source is not null)
+        if (!IsBusy && HasSource)
             StatusText = IsPlaying ? "正在播放" : sender.PlaybackState == MediaPlaybackState.Buffering ? "正在缓冲…" : "已暂停";
     });
 
     private void TimerTick(DispatcherQueueTimer sender, object args)
     {
-        if (disposed || source is null || IsBusy) return;
+        if (disposed || !HasSource || IsBusy) return;
         try
         {
             PositionSeconds = Math.Max(0, player.PlaybackSession.Position.TotalSeconds);
@@ -351,7 +388,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
             switch (args.Button)
             {
                 case SystemMediaTransportControlsButton.Play:
-                    if (IsBusy) playWhenOpened = true; else if (source is not null) player.Play();
+                    if (IsBusy) playWhenOpened = true; else if (HasSource) player.Play();
                     break;
                 case SystemMediaTransportControlsButton.Pause:
                     playWhenOpened = false;
@@ -368,7 +405,9 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
         player.Pause();
         player.Source = null;
         source?.Dispose();
+        directSource?.Dispose();
         source = null;
+        directSource = null;
         IsPlaying = false;
     }
 
