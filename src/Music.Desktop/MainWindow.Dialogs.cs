@@ -140,7 +140,7 @@ public sealed partial class MainWindow
         audio.Children.Add(new SettingsCard { Header = L.Get("PlaybackQueue"), Description = L.Get("QueueDescription"), HeaderIcon = Icon("\uE8FD"), Content = ActionButton(L.Get("OpenQueue"), () => { lyricsLoad?.Cancel(); panelMode = "queue"; queueButton.IsChecked = true; sidePanel.Visibility = Visibility.Visible; RenderQueue(); return Task.CompletedTask; }) });
         pageBody.Children.Add(audio);
         var about = new StackPanel { Spacing = 10 }; about.Children.Add(Text(L.Get("About"), 18));
-        about.Children.Add(new SettingsCard { Header = "ytmusicwinui", Description = $"0.1.0 · Music Core {core?.CoreVersion ?? "—"}", HeaderIcon = Icon("\uE946"), Content = ActionButton("GitHub", async () => { await Launcher.LaunchUriAsync(new Uri("https://github.com/meurz/ytmusicwinui")); }) });
+        about.Children.Add(new SettingsCard { Header = "ytmusicwinui", Description = $"0.1.1 · Music Core {core?.CoreVersion ?? "—"}", HeaderIcon = Icon("\uE946"), Content = ActionButton("GitHub", async () => { await Launcher.LaunchUriAsync(new Uri("https://github.com/meurz/ytmusicwinui")); }) });
         about.Children.Add(Text(L.Get("UnofficialDisclaimer"), 11, Muted)); pageBody.Children.Add(about);
     }
     private async Task ShowCreatePlaylistAsync()

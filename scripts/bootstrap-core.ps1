@@ -6,11 +6,11 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $repositoryRoot = Split-Path $PSScriptRoot -Parent
-if (!$CacheDirectory) { $CacheDirectory = Join-Path $repositoryRoot '.cache/core-v0.9.0' }
-$releaseBase = 'https://github.com/meurz/youtube-music-core/releases/download/v0.9.0'
+if (!$CacheDirectory) { $CacheDirectory = Join-Path $repositoryRoot '.cache/core-v0.9.1' }
+$releaseBase = 'https://github.com/meurz/youtube-music-core/releases/download/v0.9.1'
 $artifacts = @{
-    x64 = @{ Name = 'ytmusic-x86_64-pc-windows-msvc.tar.gz'; Sha256 = '5cc527b8bd9aecaa0432ac72fd9091c585cf9ef45d12abf58086d5254dc713b2' }
-    arm64 = @{ Name = 'ytmusic-aarch64-pc-windows-msvc.tar.gz'; Sha256 = 'f49ff326b18506fe1e0675291c759f855b8d8e996c613b0606ace3c8de7563c6' }
+    x64 = @{ Name = 'ytmusic-x86_64-pc-windows-msvc.tar.gz'; Sha256 = '16f10f6a806839d771a61916f454f6f7581ed128ab60aa14fbea1ad8a5750fde' }
+    arm64 = @{ Name = 'ytmusic-aarch64-pc-windows-msvc.tar.gz'; Sha256 = '47ebfd7c913b01dc1daaed8e5520b6b71d1741a176b5d138cbceb3653d7d4045' }
 }
 $artifact = $artifacts[$Architecture]
 New-Item -ItemType Directory -Force -Path $CacheDirectory | Out-Null
@@ -41,4 +41,4 @@ New-Item -ItemType Directory -Force -Path $destination | Out-Null
 & tar -xzf $archivePath -C $destination './youtube_music_core.dll'
 if ($LASTEXITCODE -ne 0) { throw "Native core extraction failed ($LASTEXITCODE)." }
 if (!(Test-Path (Join-Path $destination 'youtube_music_core.dll'))) { throw 'The native core DLL is absent from the release archive.' }
-Write-Host "Verified youtube-music-core v0.9.0 ($Architecture): $destination"
+Write-Host "Verified youtube-music-core v0.9.1 ($Architecture): $destination"

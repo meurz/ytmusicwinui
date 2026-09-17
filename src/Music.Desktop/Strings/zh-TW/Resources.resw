@@ -664,4 +664,6 @@
   <data name="EyebrowSearch" xml:space="preserve"><value>發現下一首最愛</value></data>
   <data name="EyebrowRecent" xml:space="preserve"><value>最近播放</value></data>
   <data name="EyebrowSettings" xml:space="preserve"><value>自在聽歌</value></data>
+  <data name="VerifyingPlayback" xml:space="preserve"><value>正在驗證播放…</value></data>
+  <data name="PlaybackVerificationFailed" xml:space="preserve"><value>無法完成播放驗證，請檢查網路後重試。</value></data>
 </root>

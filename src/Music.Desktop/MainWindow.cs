@@ -139,7 +139,7 @@ public sealed partial class MainWindow : WindowEx
         {
             core = await CoreService.CreateAsync(lifetime.Token, L.LanguageTag);
             if (closing) { await core.DisposeAsync(); return; }
-            playback = new PlaybackService(core, DispatcherQueue, key => L.Get(key));
+            playback = new PlaybackService(core, DispatcherQueue, key => L.Get(key), core.EnsurePlaybackProofAsync);
             playback.Volume = volumeSlider.Value / 100;
             playback.PropertyChanged += PlaybackChanged;
             playback.Queue.CollectionChanged += (_, _) => { if (panelMode == "queue" && sidePanel.Visibility == Visibility.Visible) RenderQueue(); };

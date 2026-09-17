@@ -10,6 +10,9 @@ public sealed class CoreService : IAsyncDisposable
     private readonly SemaphoreSlim gate = new(1, 1);
     private readonly SessionStore store;
     private readonly string language;
+    private readonly PlaybackProofProvider proofProvider = new();
+    private readonly Dictionary<string, PlaybackProof> playbackProofs = new(StringComparer.Ordinal);
+    private sealed record PlaybackProof(string VideoId, string Token, long ExpiresAt, string Binding);
     private MusicCoreClient client;
     private readonly MusicCoreClient anonymousClient;
     private bool disposed;
@@ -27,10 +30,10 @@ public sealed class CoreService : IAsyncDisposable
     public string CoreVersion { get; private set; } = "";
     public string SessionStatus { get; private set; } = "signed_out";
 
-    public static async Task<CoreService> CreateAsync(CancellationToken cancellation = default, string language = "en-US")
+    public static async Task<CoreService> CreateAsync(CancellationToken cancellation = default, string language = "en-US", SessionStore? sessionStore = null)
     {
         MusicCoreClient anonymous = await MusicCoreClient.CreateAsync(DefaultConfig(language), cancellation).ConfigureAwait(false);
-        var service = new CoreService(anonymous, new SessionStore(), language);
+        var service = new CoreService(anonymous, sessionStore ?? new SessionStore(), language);
         try
         {
             JsonElement capabilities = await anonymous.CallAsync("{\"op\":\"capabilities\"}", cancellation).ConfigureAwait(false);
@@ -63,9 +66,55 @@ public sealed class CoreService : IAsyncDisposable
         }
         catch (MusicCoreException error)
         {
-            if (error.Code is "authentication_rejected" or "authentication_required") MarkSignedOut("rejected");
+            if (error.Code == "authentication_rejected"
+                || (error.Code == "authentication_required" && !ReferenceEquals(client, anonymousClient)))
+                MarkSignedOut("rejected");
             throw Sanitize(error);
         }
+        finally { gate.Release(); }
+    }
+
+    /// <summary>Installs video-bound delivery proof without sending the account to the helper.</summary>
+    public async Task EnsurePlaybackProofAsync(string videoId, bool forceRefresh, CancellationToken cancellation)
+    {
+        await gate.WaitAsync(cancellation).ConfigureAwait(false);
+        try
+        {
+            ThrowIfDisposed();
+            if (SessionStatus == "rejected") throw new MusicCoreException("authentication_rejected", "Import a valid account session.");
+            string operation = ReferenceEquals(client, anonymousClient) ? "anonymous_attestation_context" : "attestation_context";
+            var context = await client.CallAsync(JsonSerializer.Serialize(new { op = operation, video_id = videoId }), cancellation).ConfigureAwait(false);
+            string binding = context.GetProperty("session_binding").GetString() ?? throw new InvalidDataException("Missing proof context.");
+            long maximumExpiry = context.GetProperty("max_expires_at").GetInt64();
+            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var active = playbackProofs.Values.Where(proof => proof.Binding == binding && proof.ExpiresAt > now + 30)
+                .ToDictionary(proof => proof.VideoId, StringComparer.Ordinal);
+            if (!forceRefresh && active.ContainsKey(videoId)) return;
+
+            var generated = await proofProvider.GenerateAsync(videoId, forceRefresh, cancellation).ConfigureAwait(false);
+            cancellation.ThrowIfCancellationRequested();
+            long expires = Math.Min(generated.ExpiresAt, maximumExpiry);
+            if (expires <= DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 30)
+                throw new MusicCoreException("po_token_required", "Playback proof has expired.");
+            // Generating a challenge can take time; do not reinstall bundles that expired meanwhile.
+            long minimumExpiry = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 30;
+            foreach (string expired in active.Where(entry => entry.Value.ExpiresAt <= minimumExpiry).Select(entry => entry.Key).ToArray())
+                active.Remove(expired);
+            active[videoId] = new PlaybackProof(videoId, generated.Token, expires, binding);
+            while (active.Count > 16)
+                active.Remove(active.Values.Where(proof => proof.VideoId != videoId).MinBy(proof => proof.ExpiresAt)!.VideoId);
+            var tokens = active.Values.Select(proof => new
+            {
+                video_id = proof.VideoId, player_token = (string?)null, gvs_token = proof.Token,
+                expires_at = proof.ExpiresAt, session_binding = proof.Binding
+            }).ToArray();
+            // The gate excludes session replacement; cancellation is checked before native installation.
+            cancellation.ThrowIfCancellationRequested();
+            await client.CallAsync(JsonSerializer.Serialize(new { op = "set_po_tokens", tokens }), cancellation).ConfigureAwait(false);
+            playbackProofs.Clear();
+            foreach (var proof in active) playbackProofs.Add(proof.Key, proof.Value);
+        }
+        catch (MusicCoreException error) { throw Sanitize(error); }
         finally { gate.Release(); }
     }
 
@@ -221,6 +270,7 @@ public sealed class CoreService : IAsyncDisposable
 
     private void SetAccount(JsonElement account)
     {
+        playbackProofs.Clear();
         AccountName = account.GetProperty("name").GetString() ?? "";
         IsAuthenticated = true;
         SessionStatus = "authenticated";
@@ -228,6 +278,7 @@ public sealed class CoreService : IAsyncDisposable
 
     private void MarkSignedOut(string status)
     {
+        playbackProofs.Clear();
         IsAuthenticated = false;
         AccountName = "";
         SessionStatus = status;
@@ -264,6 +315,8 @@ public sealed class CoreService : IAsyncDisposable
         {
             if (disposed) return;
             disposed = true;
+            playbackProofs.Clear();
+            await proofProvider.DisposeAsync().ConfigureAwait(false);
             await DisposeQuietlyAsync(client).ConfigureAwait(false);
             if (!ReferenceEquals(client, anonymousClient))
                 await DisposeQuietlyAsync(anonymousClient).ConfigureAwait(false);

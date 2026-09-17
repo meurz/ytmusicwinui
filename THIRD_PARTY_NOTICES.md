@@ -4,7 +4,7 @@ This application reuses the following projects. Their names and trademarks belon
 
 | Component | License / terms | Source |
 | --- | --- | --- |
-| youtube-music-core 0.9.0 | MIT; bundled dependencies have their own notices | https://github.com/meurz/youtube-music-core/tree/v0.9.0 |
+| youtube-music-core 0.9.1 | MIT; bundled dependencies have their own notices | https://github.com/meurz/youtube-music-core/tree/v0.9.1 |
 | Windows App SDK / WinUI | Microsoft Windows App SDK NuGet license terms; source components under MIT | https://github.com/microsoft/WindowsAppSDK |
 | WinUIEx | MIT | https://github.com/dotMorten/WinUIEx |
 | Windows Community Toolkit | MIT | https://github.com/CommunityToolkit/Windows |
@@ -26,3 +26,9 @@ The worker uses BgUtils 4.0.3 (MIT), JSDOM 29.1.1 (MIT),
 22.22.3 (MIT with its distributed third-party notices). See
 [the worker documentation](tools/po-provider/README.md) and its
 [upstream attribution](tools/po-provider/vendor/bgutil/UPSTREAM.md).
+
+## Playback proof subprocess
+
+The portable archive also contains the separately licensed `po-provider` program.
+The MIT desktop application communicates with it through a private JSON pipe.
+The helper reuses [bgutil-ytdlp-pot-provider 2.0.0](https://github.com/Brainicism/bgutil-ytdlp-pot-provider/tree/2.0.0) under GPL-3.0-only, with BgUtils, YouTube.js, JSDOM, and native canvas dependencies. Its GPL license, upstream source, build instructions, pinned dependency lockfile, and dependency notices accompany the program in `po-provider`. Node.js is distributed with `po-provider/NODE-LICENSE`. See [the helper documentation](tools/po-provider/README.md) for its protocol and reproducible build.
