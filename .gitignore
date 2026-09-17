@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+.vs/
+artifacts/
+.native/
+.cache/
+*.user
+*.suo
+*.log
+*.dmp
+*.pdb
+.env*
+*cookie*
+*session*.json
+!docs/*
