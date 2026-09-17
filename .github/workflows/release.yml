@@ -1,0 +1,44 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check tag against project version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import os, xml.etree.ElementTree as ET
+          version = ET.parse('src/Music.Desktop/Music.Desktop.csproj').findtext('./PropertyGroup/Version')
+          assert os.environ['RELEASE_TAG'] == f'v{version}', 'Release tag does not match project version'
+          PY
+  windows:
+    needs: version
+    uses: ./.github/workflows/build.yml
+  publish:
+    needs: windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ytmusicwinui-win-*
+          merge-multiple: true
+          path: dist
+      - name: Verify and publish
+        working-directory: dist
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          cat *.sha256 > SHA256SUMS
+          sha256sum --check SHA256SUMS
+          gh release create "$RELEASE_TAG" --verify-tag --generate-notes --title "ytmusicwinui $RELEASE_TAG" ./*.zip SHA256SUMS

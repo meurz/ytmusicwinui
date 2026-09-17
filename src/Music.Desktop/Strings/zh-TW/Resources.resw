@@ -1,0 +1,667 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data xml:space="preserve" name="SearchPlaceholder">
+    <value>搜尋歌曲、藝人或播放清單</value>
+  </data>
+  <data xml:space="preserve" name="Back">
+    <value>返回</value>
+  </data>
+  <data xml:space="preserve" name="HomeTitle">
+    <value>好音樂，慢慢聽。</value>
+  </data>
+  <data xml:space="preserve" name="SelectSongForLyrics">
+    <value>選擇一首歌曲查看歌詞</value>
+  </data>
+  <data xml:space="preserve" name="SelectSongToPlay">
+    <value>選擇一首歌，開始播放</value>
+  </data>
+  <data xml:space="preserve" name="PlayPause">
+    <value>播放或暫停</value>
+  </data>
+  <data xml:space="preserve" name="LikeCurrentSong">
+    <value>喜歡目前歌曲</value>
+  </data>
+  <data xml:space="preserve" name="Shuffle">
+    <value>隨機播放</value>
+  </data>
+  <data xml:space="preserve" name="RepeatMode">
+    <value>重複播放模式</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackQueue">
+    <value>播放佇列</value>
+  </data>
+  <data xml:space="preserve" name="Lyrics">
+    <value>歌詞</value>
+  </data>
+  <data xml:space="preserve" name="RefreshPage">
+    <value>重新整理頁面</value>
+  </data>
+  <data xml:space="preserve" name="WelcomeBack">
+    <value>歡迎回來</value>
+  </data>
+  <data xml:space="preserve" name="ConnectingMusic">
+    <value>正在連線至你的音樂…</value>
+  </data>
+  <data xml:space="preserve" name="Home">
+    <value>首頁</value>
+  </data>
+  <data xml:space="preserve" name="Explore">
+    <value>探索</value>
+  </data>
+  <data xml:space="preserve" name="Library">
+    <value>音樂庫</value>
+  </data>
+  <data xml:space="preserve" name="MyCollection">
+    <value>我的收藏</value>
+  </data>
+  <data xml:space="preserve" name="LikedMusic">
+    <value>喜歡的音樂</value>
+  </data>
+  <data xml:space="preserve" name="RecentlyPlayed">
+    <value>最近播放</value>
+  </data>
+  <data xml:space="preserve" name="ExploreTitle">
+    <value>探索新的心動</value>
+  </data>
+  <data xml:space="preserve" name="ImportAccount">
+    <value>匯入帳戶</value>
+  </data>
+  <data xml:space="preserve" name="SavedSessionUnavailable">
+    <value>儲存的工作階段暫時無法使用，請重新匯入。你仍可搜尋公開音樂。</value>
+  </data>
+  <data xml:space="preserve" name="Loading">
+    <value>正在載入…</value>
+  </data>
+  <data xml:space="preserve" name="PageLoadFailed">
+    <value>暫時無法載入此頁面</value>
+  </data>
+  <data xml:space="preserve" name="Reload">
+    <value>重新載入</value>
+  </data>
+  <data xml:space="preserve" name="HomeDescription">
+    <value>從一首喜歡的歌，開始今天。</value>
+  </data>
+  <data xml:space="preserve" name="ExploreDescription">
+    <value>熟悉的旋律之外，還有新的風景。</value>
+  </data>
+  <data xml:space="preserve" name="LibraryDescription">
+    <value>把每一次心動，好好收藏。</value>
+  </data>
+  <data xml:space="preserve" name="LikedMusicDescription">
+    <value>所有讓你按下喜歡的瞬間，都在這裡。</value>
+  </data>
+  <data xml:space="preserve" name="SearchResultCount">
+    <value>搜尋結果 · {0} 個項目</value>
+  </data>
+  <data xml:space="preserve" name="ItemCount">
+    <value>{0} 個項目</value>
+  </data>
+  <data xml:space="preserve" name="EmptyLibraryTitle">
+    <value>這裡還沒有音樂</value>
+  </data>
+  <data xml:space="preserve" name="EmptyLibraryDescription">
+    <value>試著搜尋喜歡的歌曲，或選擇另一個分類。</value>
+  </data>
+  <data xml:space="preserve" name="LoadMoreRecommendations">
+    <value>載入更多推薦</value>
+  </data>
+  <data xml:space="preserve" name="LoadMore">
+    <value>載入更多</value>
+  </data>
+  <data xml:space="preserve" name="AllContentLoaded">
+    <value>已載入全部內容</value>
+  </data>
+  <data xml:space="preserve" name="LibraryTitle">
+    <value>你的音樂，自成一片。</value>
+  </data>
+  <data xml:space="preserve" name="Playlists">
+    <value>播放清單</value>
+  </data>
+  <data xml:space="preserve" name="Songs">
+    <value>歌曲</value>
+  </data>
+  <data xml:space="preserve" name="Albums">
+    <value>專輯</value>
+  </data>
+  <data xml:space="preserve" name="Artists">
+    <value>藝人</value>
+  </data>
+  <data xml:space="preserve" name="Subscriptions">
+    <value>訂閱</value>
+  </data>
+  <data xml:space="preserve" name="NewPlaylistShortcut">
+    <value>＋ 新增播放清單</value>
+  </data>
+  <data xml:space="preserve" name="All">
+    <value>全部</value>
+  </data>
+  <data xml:space="preserve" name="Videos">
+    <value>影片</value>
+  </data>
+  <data xml:space="preserve" name="SongUnavailable">
+    <value>這首歌曲目前無法播放</value>
+  </data>
+  <data xml:space="preserve" name="RecentTitle">
+    <value>讓旋律，再來一遍。</value>
+  </data>
+  <data xml:space="preserve" name="RecentDescription">
+    <value>這次開啟應用程式後聽過的音樂</value>
+  </data>
+  <data xml:space="preserve" name="RecentEmpty">
+    <value>播放一首歌，它就會出現在這裡。</value>
+  </data>
+  <data xml:space="preserve" name="WelcomeTitle">
+    <value>歡迎使用 ytmusicwinui</value>
+  </data>
+  <data xml:space="preserve" name="WelcomeDescription">
+    <value>搜尋公開音樂，或匯入帳戶查看個人音樂庫。</value>
+  </data>
+  <data xml:space="preserve" name="RetryConnection">
+    <value>重試連線</value>
+  </data>
+  <data xml:space="preserve" name="ImportCardTitle">
+    <value>把你的音樂，帶到這裡。</value>
+  </data>
+  <data xml:space="preserve" name="ImportCardDescription">
+    <value>匯入已登入的 YouTube Music 工作階段，即可查看播放清單和收藏。</value>
+  </data>
+  <data xml:space="preserve" name="AccountRequired">
+    <value>請先匯入帳戶，再存取你的音樂庫。</value>
+  </data>
+  <data xml:space="preserve" name="SessionExpired">
+    <value>帳戶工作階段已失效，請重新匯入已登入的工作階段。</value>
+  </data>
+  <data xml:space="preserve" name="ConnectionTimeout">
+    <value>連線逾時，請稍後重試。首次準備播放可能需要較長時間。</value>
+  </data>
+  <data xml:space="preserve" name="RateLimited">
+    <value>要求暫時過於頻繁，請稍後再試。</value>
+  </data>
+  <data xml:space="preserve" name="MutationOutcomeUnknown">
+    <value>伺服器可能已儲存這次修改。請重新整理並確認，不要重複送出。</value>
+  </data>
+  <data xml:space="preserve" name="WebVerificationRequired">
+    <value>這首歌曲需要額外的網頁驗證，目前的原生用戶端暫時無法播放。</value>
+  </data>
+  <data xml:space="preserve" name="LyricsUnavailable">
+    <value>這首歌曲暫時沒有可用的歌詞。</value>
+  </data>
+  <data xml:space="preserve" name="NetworkUnavailable">
+    <value>網路暫時無法使用，請檢查連線後重試。</value>
+  </data>
+  <data xml:space="preserve" name="OperationFailedCode">
+    <value>操作未完成（{0}）。請重新整理頁面後重試。</value>
+  </data>
+  <data xml:space="preserve" name="CoreNotFound">
+    <value>找不到相符的音樂核心，請使用完整的 Windows 發行套件。</value>
+  </data>
+  <data xml:space="preserve" name="OperationFailed">
+    <value>操作未完成，請稍後重試。</value>
+  </data>
+  <data xml:space="preserve" name="Confirm">
+    <value>確定</value>
+  </data>
+  <data xml:space="preserve" name="Cancel">
+    <value>取消</value>
+  </data>
+  <data xml:space="preserve" name="CoreNotReady">
+    <value>音樂核心尚未就緒，請稍後重試。</value>
+  </data>
+  <data xml:space="preserve" name="ImportAccountExplanation">
+    <value>使用瀏覽器中已登入的 YouTube Music 帳戶。應用程式不會要求你的 Google 密碼。</value>
+  </data>
+  <data xml:space="preserve" name="OpenYouTubeMusic">
+    <value>開啟 YouTube Music</value>
+  </data>
+  <data xml:space="preserve" name="CookieImportInstructions">
+    <value>在瀏覽器開發人員工具的「網路」中，選取 music.youtube.com 要求，將要求標頭中的 Cookie 值貼到下方。</value>
+  </data>
+  <data xml:space="preserve" name="CookiePlaceholder">
+    <value>貼上 Cookie 值</value>
+  </data>
+  <data xml:space="preserve" name="SessionStorageExplanation">
+    <value>工作階段只儲存在本機，使用 Windows 帳戶加密；登入失效後需要重新匯入。</value>
+  </data>
+  <data xml:space="preserve" name="ImportMusicAccount">
+    <value>匯入音樂帳戶</value>
+  </data>
+  <data xml:space="preserve" name="VerifyAndImport">
+    <value>驗證並匯入</value>
+  </data>
+  <data xml:space="preserve" name="CookieRequired">
+    <value>請先貼上 Cookie 值。</value>
+  </data>
+  <data xml:space="preserve" name="VerifyingAccount">
+    <value>正在驗證帳戶並加密儲存…</value>
+  </data>
+  <data xml:space="preserve" name="ImportCancelled">
+    <value>已取消匯入。</value>
+  </data>
+  <data xml:space="preserve" name="ImportFailed">
+    <value>匯入未完成。請確認 Cookie 來自已登入的 Music 頁面且已完整複製，再重試。</value>
+  </data>
+  <data xml:space="preserve" name="AccountImported">
+    <value>帳戶已匯入，工作階段將自動維護</value>
+  </data>
+  <data xml:space="preserve" name="CurrentAccountPrefix">
+    <value>目前帳戶：</value>
+  </data>
+  <data xml:space="preserve" name="SelectMusicProfile">
+    <value>選擇音樂個人資料</value>
+  </data>
+  <data xml:space="preserve" name="MusicAccount">
+    <value>音樂帳戶</value>
+  </data>
+  <data xml:space="preserve" name="ProfileUnavailableExplanation">
+    <value>若無法切換個人資料，請先在瀏覽器中選取，再重新匯入。</value>
+  </data>
+  <data xml:space="preserve" name="Account">
+    <value>帳戶</value>
+  </data>
+  <data xml:space="preserve" name="SwitchProfile">
+    <value>切換個人資料</value>
+  </data>
+  <data xml:space="preserve" name="Return">
+    <value>返回</value>
+  </data>
+  <data xml:space="preserve" name="SignOutCurrentAccount">
+    <value>登出目前帳戶</value>
+  </data>
+  <data xml:space="preserve" name="SignOutExplanation">
+    <value>清除此電腦儲存的音樂工作階段。瀏覽器中的 Google 登入不受影響。</value>
+  </data>
+  <data xml:space="preserve" name="SignOutAccount">
+    <value>登出帳戶</value>
+  </data>
+  <data xml:space="preserve" name="SignedOut">
+    <value>已登出帳戶</value>
+  </data>
+  <data xml:space="preserve" name="Settings">
+    <value>設定</value>
+  </data>
+  <data xml:space="preserve" name="SettingsTitle">
+    <value>讓音樂，更合你的習慣。</value>
+  </data>
+  <data xml:space="preserve" name="SettingsDescription">
+    <value>帳戶、播放與應用程式資訊</value>
+  </data>
+  <data xml:space="preserve" name="NotSignedIn">
+    <value>尚未登入</value>
+  </data>
+  <data xml:space="preserve" name="ImportSessionDescription">
+    <value>從已登入的官方網頁匯入音樂工作階段</value>
+  </data>
+  <data xml:space="preserve" name="ImportSession">
+    <value>匯入工作階段</value>
+  </data>
+  <data xml:space="preserve" name="MusicProfile">
+    <value>音樂個人資料</value>
+  </data>
+  <data xml:space="preserve" name="MusicProfileDescription">
+    <value>在目前工作階段可用的帳戶或頻道之間切換</value>
+  </data>
+  <data xml:space="preserve" name="Manage">
+    <value>管理</value>
+  </data>
+  <data xml:space="preserve" name="SessionMaintenance">
+    <value>工作階段維護</value>
+  </data>
+  <data xml:space="preserve" name="SessionMaintenanceDescription">
+    <value>使用期間每 10 分鐘檢查並儲存有效工作階段的更新</value>
+  </data>
+  <data xml:space="preserve" name="RefreshNow">
+    <value>立即更新</value>
+  </data>
+  <data xml:space="preserve" name="SessionRefreshed">
+    <value>工作階段已更新並儲存</value>
+  </data>
+  <data xml:space="preserve" name="ClearLocalSession">
+    <value>清除本機工作階段</value>
+  </data>
+  <data xml:space="preserve" name="ClearSessionDescription">
+    <value>即使離線或登入失效，也能移除儲存的工作階段</value>
+  </data>
+  <data xml:space="preserve" name="SignOut">
+    <value>登出</value>
+  </data>
+  <data xml:space="preserve" name="Playback">
+    <value>播放</value>
+  </data>
+  <data xml:space="preserve" name="WindowsNativeAudio">
+    <value>Windows 原生音訊</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackFeatures">
+    <value>AAC/DASH 自適應播放 · Opus 音訊 · 系統媒體鍵 · 佇列與重複播放</value>
+  </data>
+  <data xml:space="preserve" name="Automatic">
+    <value>自動</value>
+  </data>
+  <data xml:space="preserve" name="QueueDescription">
+    <value>以滑鼠右鍵點選歌曲可加入佇列；點選底部的佇列按鈕即可查看</value>
+  </data>
+  <data xml:space="preserve" name="OpenQueue">
+    <value>開啟佇列</value>
+  </data>
+  <data xml:space="preserve" name="About">
+    <value>關於</value>
+  </data>
+  <data xml:space="preserve" name="UnofficialDisclaimer">
+    <value>非官方用戶端，與 Google 或 YouTube 無隸屬關係。部分地區或受限歌曲可能無法播放。</value>
+  </data>
+  <data xml:space="preserve" name="PlaylistTitlePlaceholder">
+    <value>例如：週末散步</value>
+  </data>
+  <data xml:space="preserve" name="PlaylistDescriptionPlaceholder">
+    <value>為播放清單留一句話（選填）</value>
+  </data>
+  <data xml:space="preserve" name="NewPlaylistDescription">
+    <value>為下一段旋律，取個名字。</value>
+  </data>
+  <data xml:space="preserve" name="PrivatePlaylistNotice">
+    <value>新播放清單預設為私人。</value>
+  </data>
+  <data xml:space="preserve" name="NewPlaylist">
+    <value>新增播放清單</value>
+  </data>
+  <data xml:space="preserve" name="Create">
+    <value>建立</value>
+  </data>
+  <data xml:space="preserve" name="PlaylistCreated">
+    <value>播放清單已建立</value>
+  </data>
+  <data xml:space="preserve" name="RenamePlaylist">
+    <value>修改播放清單名稱</value>
+  </data>
+  <data xml:space="preserve" name="Save">
+    <value>儲存</value>
+  </data>
+  <data xml:space="preserve" name="DeletePlaylist">
+    <value>刪除播放清單</value>
+  </data>
+  <data xml:space="preserve" name="DeletePlaylistConfirmation">
+    <value>確定刪除「{0}」？此操作會同步至你的音樂帳戶。</value>
+  </data>
+  <data xml:space="preserve" name="Delete">
+    <value>刪除</value>
+  </data>
+  <data xml:space="preserve" name="PlaylistDeleted">
+    <value>播放清單已刪除</value>
+  </data>
+  <data xml:space="preserve" name="SelectPlaylist">
+    <value>選擇播放清單</value>
+  </data>
+  <data xml:space="preserve" name="EditablePlaylistNotice">
+    <value>只能加入你有編輯權限的播放清單。</value>
+  </data>
+  <data xml:space="preserve" name="LoadMorePlaylists">
+    <value>載入更多播放清單</value>
+  </data>
+  <data xml:space="preserve" name="NoEditablePlaylistsOnPage">
+    <value>這一頁沒有可編輯的播放清單，可以繼續載入。</value>
+  </data>
+  <data xml:space="preserve" name="NoPlaylistsAvailable">
+    <value>目前沒有可用的播放清單，請先在音樂庫中新增。</value>
+  </data>
+  <data xml:space="preserve" name="AddToPlaylist">
+    <value>加入播放清單</value>
+  </data>
+  <data xml:space="preserve" name="Add">
+    <value>加入</value>
+  </data>
+  <data xml:space="preserve" name="PlaylistNotEditable">
+    <value>你沒有此播放清單的編輯權限，請選擇自己的播放清單。</value>
+  </data>
+  <data xml:space="preserve" name="AddedToPlaylist">
+    <value>已加入播放清單</value>
+  </data>
+  <data xml:space="preserve" name="RemoveSong">
+    <value>移除歌曲</value>
+  </data>
+  <data xml:space="preserve" name="RemoveSongConfirmation">
+    <value>要從目前的播放清單移除「{0}」嗎？</value>
+  </data>
+  <data xml:space="preserve" name="Remove">
+    <value>移除</value>
+  </data>
+  <data xml:space="preserve" name="PreviousTrack">
+    <value>上一首</value>
+  </data>
+  <data xml:space="preserve" name="NextTrack">
+    <value>下一首</value>
+  </data>
+  <data xml:space="preserve" name="RepeatOff">
+    <value>關閉重複播放</value>
+  </data>
+  <data xml:space="preserve" name="RepeatAll">
+    <value>重複播放清單</value>
+  </data>
+  <data xml:space="preserve" name="RepeatOne">
+    <value>單曲重複播放</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackPosition">
+    <value>播放進度</value>
+  </data>
+  <data xml:space="preserve" name="MuteToggle">
+    <value>靜音或恢復音量</value>
+  </data>
+  <data xml:space="preserve" name="Volume">
+    <value>音量</value>
+  </data>
+  <data xml:space="preserve" name="CloseSidebar">
+    <value>關閉側欄</value>
+  </data>
+  <data xml:space="preserve" name="QueueSongCount">
+    <value>{0} 首歌曲</value>
+  </data>
+  <data xml:space="preserve" name="QueueEmpty">
+    <value>播放一首歌，或以滑鼠右鍵加入佇列。</value>
+  </data>
+  <data xml:space="preserve" name="LoadingLyrics">
+    <value>正在載入歌詞…</value>
+  </data>
+  <data xml:space="preserve" name="NoLyrics">
+    <value>暫無歌詞</value>
+  </data>
+  <data xml:space="preserve" name="ForThisMoment">
+    <value>為此刻的你</value>
+  </data>
+  <data xml:space="preserve" name="FeatureDescription">
+    <value>音樂響起，給自己一段留白。</value>
+  </data>
+  <data xml:space="preserve" name="OpenPlaylistShortcut">
+    <value>開啟播放清單  ›</value>
+  </data>
+  <data xml:space="preserve" name="PlayNowShortcut">
+    <value>▶  立即播放</value>
+  </data>
+  <data xml:space="preserve" name="AddToQueue">
+    <value>加入播放佇列</value>
+  </data>
+  <data xml:space="preserve" name="AddedToQueue">
+    <value>已加入播放佇列</value>
+  </data>
+  <data xml:space="preserve" name="Unlike">
+    <value>取消喜歡</value>
+  </data>
+  <data xml:space="preserve" name="Like">
+    <value>喜歡</value>
+  </data>
+  <data xml:space="preserve" name="AddToPlaylistDialog">
+    <value>加入播放清單…</value>
+  </data>
+  <data xml:space="preserve" name="CopySongLink">
+    <value>複製歌曲連結</value>
+  </data>
+  <data xml:space="preserve" name="SongLinkCopied">
+    <value>已複製歌曲連結</value>
+  </data>
+  <data xml:space="preserve" name="RemoveFromPlaylist">
+    <value>從播放清單移除</value>
+  </data>
+  <data xml:space="preserve" name="MoveToPlaylistEnd">
+    <value>移至播放清單末尾</value>
+  </data>
+  <data xml:space="preserve" name="Open">
+    <value>開啟</value>
+  </data>
+  <data xml:space="preserve" name="SaveToLibrary">
+    <value>儲存至音樂庫</value>
+  </data>
+  <data xml:space="preserve" name="RemoveFromLibrary">
+    <value>從音樂庫移除</value>
+  </data>
+  <data xml:space="preserve" name="Unsubscribe">
+    <value>取消訂閱</value>
+  </data>
+  <data xml:space="preserve" name="SubscribeArtist">
+    <value>訂閱藝人</value>
+  </data>
+  <data xml:space="preserve" name="PlayAllShortcut">
+    <value>▶  播放全部</value>
+  </data>
+  <data xml:space="preserve" name="EnqueueAllShortcut">
+    <value>＋ 加入佇列</value>
+  </data>
+  <data xml:space="preserve" name="EditPlaylist">
+    <value>編輯播放清單</value>
+  </data>
+  <data xml:space="preserve" name="UnsavePlaylist">
+    <value>取消收藏</value>
+  </data>
+  <data xml:space="preserve" name="SavePlaylist">
+    <value>收藏播放清單</value>
+  </data>
+  <data xml:space="preserve" name="SongLiked">
+    <value>已喜歡這首歌曲</value>
+  </data>
+  <data xml:space="preserve" name="SongUnliked">
+    <value>已取消喜歡</value>
+  </data>
+  <data xml:space="preserve" name="ChangeSavedReloaded">
+    <value>修改已送出，頁面已重新載入</value>
+  </data>
+  <data xml:space="preserve" name="ChooseTrackToStart">
+    <value>選擇一首歌曲開始播放</value>
+  </data>
+  <data xml:space="preserve" name="ItemNotPlayable">
+    <value>此項目無法直接播放，請開啟播放清單或專輯</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackStopped">
+    <value>已停止播放</value>
+  </data>
+  <data xml:space="preserve" name="TryingOpus">
+    <value>正在嘗試 Opus 音訊…</value>
+  </data>
+  <data xml:space="preserve" name="RefreshingSource">
+    <value>正在重新取得播放來源…</value>
+  </data>
+  <data xml:space="preserve" name="PreparingAudio">
+    <value>正在準備音訊…</value>
+  </data>
+  <data xml:space="preserve" name="LoadingAudio">
+    <value>正在載入音訊…</value>
+  </data>
+  <data xml:space="preserve" name="QueueFinished">
+    <value>佇列已播放完畢</value>
+  </data>
+  <data xml:space="preserve" name="Playing">
+    <value>正在播放</value>
+  </data>
+  <data xml:space="preserve" name="Paused">
+    <value>已暫停</value>
+  </data>
+  <data xml:space="preserve" name="AudioLinkRejected">
+    <value>音訊連結遭拒，請檢查登入狀態或網路後重試</value>
+  </data>
+  <data xml:space="preserve" name="AudioConnectionFailed">
+    <value>音訊連線失敗，請檢查網路後重試</value>
+  </data>
+  <data xml:space="preserve" name="AudioDecodingFailed">
+    <value>Windows 無法解碼這首歌曲的音訊</value>
+  </data>
+  <data xml:space="preserve" name="AudioSourceUnsupported">
+    <value>Windows 不支援此音訊來源</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackFailedSelectAgain">
+    <value>播放失敗，請重新選擇歌曲再試一次</value>
+  </data>
+  <data xml:space="preserve" name="Buffering">
+    <value>正在緩衝…</value>
+  </data>
+  <data xml:space="preserve" name="PositionReadFailed">
+    <value>暫時無法讀取播放進度</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackSessionExpired">
+    <value>登入已失效，請重新匯入 Cookie</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackRateLimited">
+    <value>要求過於頻繁，請稍後再試</value>
+  </data>
+  <data xml:space="preserve" name="OfficialVerificationRequired">
+    <value>這首歌曲需要額外的官方播放驗證，暫時無法播放</value>
+  </data>
+  <data xml:space="preserve" name="AudioRequestTimeout">
+    <value>取得音訊逾時，請重試</value>
+  </data>
+  <data xml:space="preserve" name="SabrNotSupported">
+    <value>這首歌曲需要 SABR 音訊，目前用戶端尚未支援</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackSongUnavailable">
+    <value>這首歌曲目前無法播放</value>
+  </data>
+  <data xml:space="preserve" name="NoAacSource">
+    <value>這首歌曲暫時沒有可用的 AAC 音訊來源</value>
+  </data>
+  <data xml:space="preserve" name="DashUnsupported">
+    <value>目前的 Windows 系統不支援 DASH 音訊播放</value>
+  </data>
+  <data xml:space="preserve" name="AudioLoadFailed">
+    <value>無法載入音訊，請檢查登入狀態或網路後重試</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackOperationFailed">
+    <value>播放操作失敗，請重試</value>
+  </data>
+  <data xml:space="preserve" name="Language">
+    <value>語言</value>
+  </data>
+  <data xml:space="preserve" name="LanguageDescription">
+    <value>選擇介面語言，重新啟動應用程式後生效</value>
+  </data>
+  <data xml:space="preserve" name="FollowSystem">
+    <value>跟隨系統</value>
+  </data>
+  <data xml:space="preserve" name="LanguageRestartNotice">
+    <value>語言將在重新啟動應用程式後生效。</value>
+  </data>
+  <data xml:space="preserve" name="LanguageSaved">
+    <value>語言偏好已儲存，將在下次啟動時生效。</value>
+  </data>
+  <data xml:space="preserve" name="RestartNow">
+    <value>立即重新啟動</value>
+  </data>
+  <data xml:space="preserve" name="RestartLater">
+    <value>稍後重新啟動</value>
+  </data>
+  <data xml:space="preserve" name="CurrentAccountFormat">
+    <value>目前帳戶：{0}</value>
+  </data>
+  <data name="EyebrowWelcome" xml:space="preserve"><value>你的音樂，你的時光</value></data>
+  <data name="EyebrowHome" xml:space="preserve"><value>一點音樂，讓今天更好。</value></data>
+  <data name="EyebrowExplore" xml:space="preserve"><value>聽一點不一樣的</value></data>
+  <data name="EyebrowLibrary" xml:space="preserve"><value>屬於你的音樂世界</value></data>
+  <data name="EyebrowSearch" xml:space="preserve"><value>發現下一首最愛</value></data>
+  <data name="EyebrowRecent" xml:space="preserve"><value>最近播放</value></data>
+  <data name="EyebrowSettings" xml:space="preserve"><value>自在聽歌</value></data>
+</root>
