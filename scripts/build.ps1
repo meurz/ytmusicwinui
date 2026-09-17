@@ -28,5 +28,16 @@ if ($Publish) {
     }
     Copy-Item (Join-Path $repositoryRoot 'LICENSE') $OutputDirectory
     Copy-Item (Join-Path $repositoryRoot 'THIRD_PARTY_NOTICES.md') $OutputDirectory
+    Copy-Item (Join-Path $repositoryRoot 'licenses') $OutputDirectory -Recurse -Force
+    $coreLicenses = Join-Path $OutputDirectory 'licenses/core'
+    New-Item -ItemType Directory -Force -Path $coreLicenses | Out-Null
+    Copy-Item (Join-Path $repositoryRoot 'external/core/LICENSE') $coreLicenses
+    Copy-Item (Join-Path $repositoryRoot 'external/core/THIRD_PARTY_NOTICES.md') $coreLicenses
+    Get-ChildItem (Join-Path $repositoryRoot 'external/core/vendor') -Recurse -File | Where-Object { $_.Name -match 'LICENSE|COPYING|NOTICE' } | ForEach-Object {
+        $relative = $_.FullName.Substring((Join-Path $repositoryRoot 'external/core/vendor').Length).TrimStart('\', '/')
+        $target = Join-Path (Join-Path $coreLicenses 'vendor') $relative
+        New-Item -ItemType Directory -Force -Path (Split-Path $target -Parent) | Out-Null
+        Copy-Item $_.FullName $target
+    }
     Write-Host "Published: $OutputDirectory/ytmusicwinui.exe"
 }

@@ -1,0 +1,43 @@
+name: Build Windows packages
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  build:
+    name: Windows ${{ matrix.architecture }}
+    runs-on: windows-2025
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture: [x64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Restore, build and publish
+        shell: pwsh
+        run: ./scripts/build.ps1 -Architecture ${{ matrix.architecture }} -Publish
+      - name: Run application tests
+        if: matrix.architecture == 'x64'
+        shell: pwsh
+        run: |
+          dotnet run --project tests/CoreContractChecks/CoreContractChecks.csproj --configuration Release
+          if ($LASTEXITCODE -ne 0) { throw 'Application contract checks failed.' }
+      - name: Create portable archive
+        shell: pwsh
+        run: |
+          $name = 'ytmusicwinui-win-${{ matrix.architecture }}'
+          Compress-Archive -Path "artifacts/$name/*" -DestinationPath "artifacts/$name.zip"
+          $hash = (Get-FileHash "artifacts/$name.zip" -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $name.zip" | Set-Content "artifacts/$name.sha256" -Encoding ascii
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ytmusicwinui-win-${{ matrix.architecture }}
+          path: |
+            artifacts/ytmusicwinui-win-${{ matrix.architecture }}.zip
+            artifacts/ytmusicwinui-win-${{ matrix.architecture }}.sha256
+          if-no-files-found: error
