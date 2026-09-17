@@ -18,7 +18,7 @@ Download the matching portable ZIP from [Releases](https://github.com/meurz/ytmu
 Get-FileHash .\ytmusicwinui-win-x64.zip -Algorithm SHA256
 ```
 
-The client provides native navigation, search, library and playlist browsing, a persistent player, queue and lyrics surfaces, and account/session settings. Feature availability also depends on the signed-in account and the core response. No browser is embedded for audio playback.
+The client provides native navigation, search and suggestions, paged library and playlist browsing, playlist creation/rename/deletion and song actions, a persistent player, queue and lyrics surfaces, and account/session settings. Feature availability also depends on the signed-in account and the core response. No browser is embedded for audio playback.
 
 ## Build
 
@@ -37,11 +37,17 @@ CI builds both architectures and uploads portable ZIPs with checksums. Version t
 
 ## Playback and accounts
 
-Audio uses the native Windows media player with the core's existing Windows source adapter. The initial host targets clear AAC/DASH playback. Core support for PO tokens or SABR does not imply that every restricted track can play in this host; progressive SABR demux is not integrated. There is no DRM or browser playback bridge.
+Audio uses the native Windows media player with the core's existing Windows source adapter. The host uses clear AAC/DASH playback and a bounded native Opus fallback when AAC is unavailable. Core support for PO tokens or SABR does not imply that every restricted track can play in this host; progressive SABR demux is not integrated. There is no DRM or browser playback bridge.
 
-Session import uses your existing YouTube Music cookies. Sessions are encrypted locally using Windows DPAPI for the current user. Cookie maintenance can preserve a valid session; an expired or revoked session can require a new import. Never commit, share, or attach cookies or account session files to an issue.
+Open Settings → Import session, open the official Music website in your browser, and paste the Cookie request-header value from a signed-in music.youtube.com request into the masked field. The field accepts a Cookie value or a single `Cookie:` line; full request headers and Netscape exports are not accepted by this UI. Session import verifies the account before replacing any saved session. Sessions are encrypted locally using Windows DPAPI for the current user. While the app is running, active sessions are checked and securely saved every ten minutes. Cookie maintenance can preserve a valid session; an expired or revoked session can require a new import. Never commit, share, or attach cookies or account session files to an issue.
 
 Live signed-in playback and personal library acceptance require a valid account session. Automated builds do not authenticate a Google account and cannot establish account-specific playback coverage.
+
+## Verification
+
+Windows x64 and ARM64 packages are built in CI. The Windows contract check exercises actual DPAPI storage, cancellation/corrupt-file preservation and response models. The opt-in [native playback smoke check](tests/PlaybackSmoke/README.md) exercises the real core and MediaPlayer at zero volume; it is compiled but does not access YouTube in CI.
+
+Public-reference playback has been checked for an advancing clock, native seeking, SMTC state, rapid track replacement, stop/cancellation and resource disposal. A successful initial URL probe does not guarantee full delivery: some anonymous tracks reject later ranges, and these errors remain visible rather than being reported as successful playback. Personal-account operations need separate verification after importing a valid session.
 
 ## Development
 

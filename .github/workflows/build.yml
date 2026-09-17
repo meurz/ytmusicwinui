@@ -27,6 +27,10 @@ jobs:
         run: |
           dotnet run --project tests/CoreContractChecks/CoreContractChecks.csproj --configuration Release
           if ($LASTEXITCODE -ne 0) { throw 'Application contract checks failed.' }
+      - name: Compile opt-in playback check
+        if: matrix.architecture == 'x64'
+        shell: pwsh
+        run: dotnet build tests/PlaybackSmoke/PlaybackSmoke.csproj --configuration Release
       - name: Create portable archive
         shell: pwsh
         run: |

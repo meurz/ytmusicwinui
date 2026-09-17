@@ -60,7 +60,7 @@ public sealed partial class MainWindow : WindowEx
         Title = "ytmusicwinui"; Width = 1280; Height = 850; MinWidth = 900; MinHeight = 660;
         PersistenceId = "ytmusicwinui.MainWindow";
         ExtendsContentIntoTitleBar = true;
-        var layout = new Grid { Background = BackgroundBrush };
+        var layout = new Grid { Background = BackgroundBrush, KeyboardAcceleratorPlacementMode = KeyboardAcceleratorPlacementMode.Hidden };
         layout.RowDefinitions.Add(new RowDefinition { Height = new GridLength(42) });
         layout.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
         layout.RowDefinitions.Add(new RowDefinition { Height = new GridLength(100) });
@@ -166,6 +166,8 @@ public sealed partial class MainWindow : WindowEx
             token.ThrowIfCancellationRequested();
             currentPage = MusicPage.FromJson(result);
             RenderPage(result);
+            pageScroll.UpdateLayout();
+            pageScroll.ChangeView(null, 0, null, true);
             DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () => { if (!token.IsCancellationRequested) pageScroll.ChangeView(null, 0, null, true); });
         }
         catch (OperationCanceledException) { }
