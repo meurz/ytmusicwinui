@@ -71,7 +71,7 @@ public sealed partial class MainWindow
         }
         playButton.Content = Icon(playback.IsPlaying ? "\uE769" : "\uE768", 17, White); playButton.IsEnabled = current is not null && !playback.IsBusy;
         playStatus.Text = playback.StatusText; ToolTipService.SetToolTip(playStatus, playback.StatusText);
-        if (args.PropertyName == nameof(PlaybackService.StatusText) && !playback.IsBusy &&
+        if ((args.PropertyName is nameof(PlaybackService.StatusText) or nameof(PlaybackService.IsBusy)) && !playback.IsBusy &&
             playback.HasError)
             ShowNotice(playback.StatusText, InfoBarSeverity.Warning);
         positionLabel.Text = FormatTime(playback.PositionSeconds); durationLabel.Text = FormatTime(playback.DurationSeconds);

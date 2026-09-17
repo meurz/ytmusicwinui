@@ -167,6 +167,7 @@ public sealed partial class MainWindow : WindowEx
             JsonElement result = await core.CallAsync(request, token);
             token.ThrowIfCancellationRequested();
             currentPage = MusicPage.FromJson(result);
+            pageScroll.Focus(FocusState.Programmatic);
             RenderPage(result);
             pageScroll.UpdateLayout();
             pageScroll.ChangeView(null, 0, null, true);
