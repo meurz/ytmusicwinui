@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-x64</RuntimeIdentifier>
+    <PlatformTarget Condition="'$(RuntimeIdentifier)' == 'win-x64'">x64</PlatformTarget>
+    <PlatformTarget Condition="'$(RuntimeIdentifier)' == 'win-arm64'">ARM64</PlatformTarget>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <CoreInteropProject Condition="'$(CoreInteropProject)' == ''">$(MSBuildThisFileDirectory)../../external/core/examples/dotnet/windows/YouTubeMusic.Interop.Windows.csproj</CoreInteropProject>
+    <ModelsDirectory Condition="'$(ModelsDirectory)' == ''">$(MSBuildThisFileDirectory)../../src/Music.Desktop/Models</ModelsDirectory>
+    <NativeCoreDirectory>$(MSBuildThisFileDirectory)../../.native/$(RuntimeIdentifier)</NativeCoreDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260804001" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <ProjectReference Include="$(CoreInteropProject)" />
+    <Compile Include="../../src/Music.Desktop/Services/PlaybackService.cs" Link="PlaybackService.cs" />
+    <Compile Include="$(ModelsDirectory)/*.cs" Link="Models/%(Filename)%(Extension)" />
+    <Content Include="$(NativeCoreDirectory)/youtube_music_core.dll" Link="youtube_music_core.dll" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="RequireNativeCore" BeforeTargets="PrepareForBuild">
+    <Error Condition="!Exists('$(NativeCoreDirectory)/youtube_music_core.dll')" Text="Run scripts/bootstrap-core.ps1 before building the live playback check." />
+  </Target>
+</Project>
