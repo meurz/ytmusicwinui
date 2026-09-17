@@ -1,11 +1,27 @@
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Music.Desktop.Localization;
 namespace Music.Desktop;
 internal static class Program
 {
     [STAThread]
-    private static void Main()
+    private static void Main(string[] arguments)
     {
+        if (arguments.Length == 1 && arguments[0] == "--verify-localization")
+        {
+            try
+            {
+                WinRT.ComWrappersSupport.InitializeComWrappers();
+                L.VerifyAllLanguages();
+                Environment.ExitCode = 0;
+            }
+            catch (Exception error)
+            {
+                DiagnosticLog.Write("localization_verification_failed", error);
+                Environment.ExitCode = 1;
+            }
+            return;
+        }
         using var mutex = new Mutex(true, @"Local\ytmusicwinui.Instance", out bool first);
         using var activation = new EventWaitHandle(false, EventResetMode.AutoReset, @"Local\ytmusicwinui.Activate");
         if (!first) { activation.Set(); return; }
