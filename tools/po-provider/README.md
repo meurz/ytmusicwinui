@@ -48,7 +48,10 @@ proof accepted for a media range beyond YouTube's initial playback allowance.
 transpiles/bundles it without maintaining another implementation of the challenge
 or minter. `vendor/bgutil/UPSTREAM.md` records its origin. The generated JavaScript,
 source, build script, lockfile, GPL license and dependency licenses are distributed
-together. The pinned Node.js runtime includes its own license. The desktop
+together. The source manifest pins original source archives for BgUtils, YouTube.js,
+proxy-agents and native canvas; npm distributions otherwise omit original
+TypeScript or native implementation sources.
+The bootstrap script verifies and includes those archives in `source-archives`. The pinned Node.js runtime includes its own license. The desktop
 application's MIT license does not replace this worker's GPL-3.0-only license.
 
 The helper executes Google's current challenge code, so network availability and

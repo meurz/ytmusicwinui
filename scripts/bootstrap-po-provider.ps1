@@ -43,8 +43,9 @@ $hostNode = Join-Path $hostRuntime 'node.exe'
 $npmCli = Join-Path $hostRuntime 'node_modules/npm/bin/npm-cli.js'
 $buildDirectory = Join-Path $cacheRoot "build-$Architecture"
 $npmCache = Join-Path $cacheRoot 'npm-cache'
+if (Test-Path $buildDirectory) { Remove-Item $buildDirectory -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $buildDirectory | Out-Null
-foreach ($file in @('package.json', 'package-lock.json', 'worker.cjs', 'build.mjs', 'README.md', 'LICENSE')) {
+foreach ($file in @('package.json', 'package-lock.json', 'worker.cjs', 'build.mjs', 'README.md', 'LICENSE', 'source-manifest.json')) {
     Copy-Item (Join-Path $sourceDirectory $file) $buildDirectory -Force
 }
 Copy-Item (Join-Path $sourceDirectory 'vendor') $buildDirectory -Recurse -Force
@@ -57,10 +58,40 @@ finally { Pop-Location }
 if ($LASTEXITCODE -ne 0) { throw "PO helper runtime dependency restore failed ($LASTEXITCODE)." }
 $canvasPackage = Join-Path $buildDirectory "node_modules/@napi-rs/canvas-win32-$Architecture-msvc"
 if (!(Test-Path $canvasPackage)) { throw 'The matching native canvas package is absent.' }
+$sourceArchives = Join-Path $cacheRoot 'source-archives'
+New-Item -ItemType Directory -Force -Path $sourceArchives | Out-Null
+foreach ($entry in (Get-Content (Join-Path $sourceDirectory 'source-manifest.json') -Raw | ConvertFrom-Json)) {
+    if ($entry.file -ne [IO.Path]::GetFileName($entry.file) -or $entry.url -notmatch '^https://codeload\.github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/tar\.gz/[a-f0-9]{40}$') {
+        throw 'Invalid dependency source archive metadata.'
+    }
+    $archive = Join-Path $sourceArchives $entry.file
+    if (!(Test-Path $archive)) {
+        $temporary = "$archive.part"
+        try {
+            Invoke-WebRequest -UseBasicParsing -Uri $entry.url -OutFile $temporary
+            if ((Get-FileHash $temporary -Algorithm SHA256).Hash.ToLowerInvariant() -ne $entry.sha256) { throw 'Dependency source archive checksum mismatch.' }
+            Move-Item $temporary $archive -Force
+        } finally { if (Test-Path $temporary) { Remove-Item $temporary -Force } }
+    }
+    if ((Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $entry.sha256) { throw 'Cached dependency source archive checksum mismatch.' }
+}
+if (Test-Path $OutputDirectory) {
+    if ([IO.Path]::GetFullPath($OutputDirectory).TrimEnd('\', '/') -eq [IO.Path]::GetFullPath($sourceDirectory).TrimEnd('\', '/')) {
+        throw 'The helper output must not overwrite its source directory.'
+    }
+    $marker = Join-Path $OutputDirectory 'package.json'
+    if (@(Get-ChildItem $OutputDirectory -Force).Count -gt 0) {
+        if (!(Test-Path $marker) -or (Get-Content $marker -Raw | ConvertFrom-Json).name -ne 'ytmusicwinui-po-provider') {
+            throw 'Refusing to replace an output directory not owned by this helper.'
+        }
+        Remove-Item $OutputDirectory -Recurse -Force
+    }
+}
 New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
-foreach ($name in @('package.json', 'package-lock.json', 'worker.cjs', 'build.mjs', 'README.md', 'LICENSE', 'vendor', 'dist', 'node_modules')) {
+foreach ($name in @('package.json', 'package-lock.json', 'worker.cjs', 'build.mjs', 'README.md', 'LICENSE', 'source-manifest.json', 'vendor', 'dist', 'node_modules')) {
     Copy-Item (Join-Path $buildDirectory $name) $OutputDirectory -Recurse -Force
 }
+Copy-Item $sourceArchives $OutputDirectory -Recurse -Force
 Copy-Item (Join-Path $targetRuntime 'node.exe') $OutputDirectory -Force
 Copy-Item (Join-Path $targetRuntime 'LICENSE') (Join-Path $OutputDirectory 'NODE-LICENSE') -Force
 if ($Architecture -eq $hostArchitecture) {
