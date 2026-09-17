@@ -664,4 +664,6 @@
   <data name="EyebrowSearch" xml:space="preserve"><value>FIND YOUR NEXT FAVORITE</value></data>
   <data name="EyebrowRecent" xml:space="preserve"><value>RECENTLY PLAYED</value></data>
   <data name="EyebrowSettings" xml:space="preserve"><value>MAKE YOURSELF AT HOME</value></data>
+  <data name="VerifyingPlayback" xml:space="preserve"><value>Verifying playback…</value></data>
+  <data name="PlaybackVerificationFailed" xml:space="preserve"><value>Could not verify playback. Check your connection and try again.</value></data>
 </root>

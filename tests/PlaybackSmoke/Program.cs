@@ -10,7 +10,7 @@ using YouTubeMusic.Interop;
 
 if (!args.Contains("--live"))
 {
-    Console.WriteLine("Opt-in network test: --live [--full] [--opus] [--video VIDEO_ID]. Always silent and anonymous.");
+    Console.WriteLine("Opt-in network test: --live [--full] [--opus] [--retry] [--video VIDEO_ID]. Always silent and anonymous.");
     return;
 }
 int videoArgument = Array.IndexOf(args, "--video");
@@ -36,7 +36,7 @@ try
         try
         {
             var native = await MusicCoreClient.CreateAsync("{\"language\":\"en\",\"country\":\"US\",\"playback_client\":\"web_remix\"}");
-            core = new CoreService(native, args.Contains("--opus"));
+            core = new CoreService(native, args.Contains("--opus"), args.Contains("--retry"));
             playback = new PlaybackService(core, dispatcher) { Volume = 0 };
             bool wrongThread = false;
             playback.PropertyChanged += (_, _) => wrongThread |= !dispatcher.HasThreadAccess;
@@ -45,6 +45,16 @@ try
             var controls = (SystemMediaTransportControls)typeof(PlaybackService).GetField("systemControls", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(playback)!;
             var first = new MusicItem { VideoId = videoId, Title = "Silent native playback check" };
             var replacement = new MusicItem { VideoId = videoId, Title = "Replacement source check" };
+            if (args.Contains("--retry"))
+            {
+                await playback.PlayAsync(first);
+                Require(playback.HasError && !playback.IsBusy && !playback.IsPlaying, "initial_failure_state");
+                playback.TogglePlayPause();
+                await StablePlayback(playback);
+                Require(!playback.HasError, "retry_error_not_cleared");
+                Console.WriteLine("play_button_retries_failed_source: passed");
+                await playback.StopAsync();
+            }
             await playback.PlayAsync(first, [first, replacement]);
             await StablePlayback(playback);
             Require(controls.PlaybackStatus == MediaPlaybackStatus.Playing, "smtc_playing");

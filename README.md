@@ -12,7 +12,7 @@ This is an independent client, not an official Google application.
 
 ## Run
 
-Download the matching portable ZIP from [Releases](https://github.com/meurz/ytmusicwinui/releases), verify it against `SHA256SUMS`, extract the entire archive and open `ytmusicwinui.exe`. Keep its DLLs and resource files together. The package includes .NET and Windows App SDK; no separate runtime installation is required.
+Download the matching portable ZIP from [Releases](https://github.com/meurz/ytmusicwinui/releases), verify it against `SHA256SUMS`, extract the entire archive and open `ytmusicwinui.exe`. Keep its DLLs, resource files, and `po-provider` folder together. The package includes .NET and Windows App SDK; no separate runtime installation is required.
 
 ```powershell
 Get-FileHash .\ytmusicwinui-win-x64.zip -Algorithm SHA256
@@ -33,13 +33,13 @@ cd ytmusicwinui
 .\artifacts\ytmusicwinui-win-x64\ytmusicwinui.exe
 ```
 
-Use `-Architecture arm64` for Windows on ARM. The script downloads the pinned core release, checks its SHA-256 hash, restores NuGet packages, and creates a self-contained desktop folder. It does not compile Rust. To control NuGet cache placement, set `NUGET_PACKAGES` before building. Temporary native downloads stay in the repository's ignored `.cache` and `.native` directories.
+Use `-Architecture arm64` for Windows on ARM. The script downloads the pinned core and Node.js releases, checks their SHA-256 hashes, restores locked helper dependencies and NuGet packages, and creates a self-contained desktop folder. It does not compile Rust. To control NuGet cache placement, set `NUGET_PACKAGES` before building. Temporary native downloads stay in the repository's ignored `.cache` and `.native` directories.
 
 CI builds both architectures and uploads portable ZIPs with checksums. Version tags matching the project version publish those archives as GitHub Releases.
 
 ## Playback and accounts
 
-Audio uses the native Windows media player with the core's existing Windows source adapter. The host uses clear AAC/DASH playback and a bounded native Opus fallback when AAC is unavailable. Core support for PO tokens or SABR does not imply that every restricted track can play in this host; progressive SABR demux is not integrated. There is no DRM or browser playback bridge.
+Audio uses the native Windows media player with the core's existing Windows source adapter. The host uses clear AAC/DASH playback and a bounded native Opus fallback when AAC is unavailable. When the media server requires Proof of Origin, the host obtains a video-bound GVS token through the bundled local provider, refreshes the source once, and resumes from the current position. Subsequent selections prepare and cache their proof before resolving audio. The provider uses the existing BgUtils implementation in a private Node.js process; it requires no browser, separate installation, or account cookies. Tokens stay in memory, expire automatically, and are isolated by the active core session. Progressive SABR demux is not integrated. There is no DRM or browser playback bridge.
 
 Open Settings → Import session, open the official Music website in your browser, and paste the Cookie request-header value from a signed-in music.youtube.com request into the masked field. The field accepts a Cookie value or a single `Cookie:` line; full request headers and Netscape exports are not accepted by this UI. Session import verifies the account before replacing any saved session. Sessions are encrypted locally using Windows DPAPI for the current user. While the app is running, active sessions are checked and securely saved every ten minutes. Cookie maintenance can preserve a valid session; an expired or revoked session can require a new import. Never commit, share, or attach cookies or account session files to an issue.
 
@@ -47,12 +47,12 @@ Live signed-in playback and personal library acceptance require a valid account 
 
 ## Verification
 
-Windows x64 and ARM64 packages are built in CI. The Windows contract check exercises actual DPAPI storage, cancellation/corrupt-file preservation and response models. The opt-in [native playback smoke check](tests/PlaybackSmoke/README.md) exercises the real core and MediaPlayer at zero volume; it runs locally and is not part of CI. CI is limited to building and packaging the two Windows architectures.
+Windows x64 and ARM64 packages are built in CI. The Windows contract check exercises actual DPAPI storage, cancellation/corrupt-file preservation and response models. The opt-in [native playback smoke check](tests/PlaybackSmoke/README.md) and [production proof check](tests/PlaybackProofSmoke/README.md) exercise the real core and MediaPlayer at zero volume; it runs locally and is not part of CI. CI is limited to building and packaging the two Windows architectures.
 
-Public-reference playback has been checked for an advancing clock, native seeking, SMTC state, rapid track replacement, stop/cancellation and resource disposal. A successful initial URL probe does not guarantee full delivery: some anonymous tracks reject later ranges, and these errors remain visible rather than being reported as successful playback. Personal-account operations need separate verification after importing a valid session.
+Public-reference playback has been checked for an advancing clock, native seeking, SMTC state, rapid track replacement, stop/cancellation and resource disposal. A successful initial URL probe does not guarantee full delivery: tracks can require playback proof for later ranges even when the initial request succeeds. The production proof check covers this recovery with the actual host services; unrecoverable errors remain visible. Personal-account operations need separate verification after importing a valid session.
 
 ## Development
 
-See [dependency research](docs/dependency-research.md) for the existing libraries and APIs used here, and [third-party notices](THIRD_PARTY_NOTICES.md) for licensing. The Rust core is pinned at v0.9.0 (C ABI 2 / JSON protocol 2.0).
+See [dependency research](docs/dependency-research.md) for the existing libraries and APIs used here, and [third-party notices](THIRD_PARTY_NOTICES.md) for licensing. The Rust core is pinned at v0.9.1 (C ABI 2 / JSON protocol 2.0).
 
-Licensed under [MIT](LICENSE).
+The desktop application is licensed under [MIT](LICENSE). The separately distributed `po-provider` helper is GPL-3.0-only; its source, build scripts, lockfile and licenses are included. See [third-party notices](THIRD_PARTY_NOTICES.md).

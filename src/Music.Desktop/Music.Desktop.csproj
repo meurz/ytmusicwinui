@@ -19,7 +19,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <PublishTrimmed>false</PublishTrimmed>
     <PublishSingleFile>false</PublishSingleFile>
     <NativeCoreDirectory>$(MSBuildThisFileDirectory)../../.native/$(RuntimeIdentifier)</NativeCoreDirectory>
@@ -34,8 +34,12 @@
     <ProjectReference Include="../../external/core/examples/dotnet/windows/YouTubeMusic.Interop.Windows.csproj" />
     <Content Include="$(NativeCoreDirectory)/youtube_music_core.dll" Link="youtube_music_core.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="../../.native/$(RuntimeIdentifier)/po-provider/**/*" Link="po-provider/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
   <Target Name="RequireNativeCore" BeforeTargets="PrepareForBuild">
     <Error Condition="!Exists('$(NativeCoreDirectory)/youtube_music_core.dll')" Text="The pinned native core is missing. Run scripts/bootstrap-core.ps1 -Architecture x64 (or arm64) before building." />
+    <Error Condition="!Exists('$(NativeCoreDirectory)/po-provider/node.exe') Or !Exists('$(NativeCoreDirectory)/po-provider/worker.cjs')" Text="The playback proof provider is missing. Run scripts/bootstrap-po-provider.ps1 for the target architecture." />
   </Target>
   <Target Name="PublishApplicationResourceIndex" AfterTargets="ComputeFilesToPublish">
     <Error Condition="!Exists('$(TargetDir)$(AssemblyName).pri')" Text="The application resource index is missing. Build the WinUI application before publishing." />

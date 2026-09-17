@@ -15,6 +15,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
     private readonly CoreService core;
     private readonly DispatcherQueue dispatcher;
     private readonly Func<string, string> localize;
+    private readonly Func<string, bool, CancellationToken, Task>? ensurePo;
     private readonly MediaPlayer player = new() { AutoPlay = false };
     private readonly DispatcherQueueTimer timer;
     private readonly SystemMediaTransportControls systemControls;
@@ -31,6 +32,8 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
     private bool stopping;
     private bool closing;
     private bool recoveryAttempted;
+    private bool proofRefreshAttempted;
+    private bool playbackProofRequired;
     private double pendingSeek;
     private bool playWhenOpened;
     private MusicItem? current;
@@ -44,11 +47,13 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
     private double volume = .75;
     private string statusText;
 
-    public PlaybackService(CoreService core, DispatcherQueue dispatcher, Func<string, string>? localize = null)
+    public PlaybackService(CoreService core, DispatcherQueue dispatcher, Func<string, string>? localize = null,
+        Func<string, bool, CancellationToken, Task>? ensurePo = null)
     {
         this.core = core;
         this.dispatcher = dispatcher;
         this.localize = localize ?? (static key => key);
+        this.ensurePo = ensurePo;
         statusText = this.localize("ChooseTrackToStart");
         if (!dispatcher.HasThreadAccess)
             throw new InvalidOperationException("Create playback on the window dispatcher thread.");
@@ -79,6 +84,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
     public bool IsPlaying { get => isPlaying; private set => SetProperty(ref isPlaying, value); }
     public bool IsBusy { get => isBusy; private set => SetProperty(ref isBusy, value); }
     public bool HasError { get => hasError; private set => SetProperty(ref hasError, value); }
+    public int NativeFailureCode { get; private set; }
     public string StatusText { get => statusText; private set => SetProperty(ref statusText, value); }
     public double PositionSeconds { get => positionSeconds; private set => SetProperty(ref positionSeconds, value); }
     public double DurationSeconds { get => durationSeconds; private set => SetProperty(ref durationSeconds, value); }
@@ -119,7 +125,11 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
     public void TogglePlayPause() => Post(() =>
     {
         if (IsBusy) { playWhenOpened = !playWhenOpened; return; }
-        if (!HasSource) return;
+        if (!HasSource)
+        {
+            if (Current is not null) Observe(Track(LoadAsync(Current, false, 0, true)));
+            return;
+        }
         playWhenOpened = !IsPlaying;
         if (IsPlaying) player.Pause(); else player.Play();
     });
@@ -177,7 +187,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
         finally { await OnUiAsync(() => { stopping = closing; return Task.CompletedTask; }); }
     }
 
-    private async Task LoadAsync(MusicItem item, bool refresh, double seek, bool autoPlay, bool webm = false)
+    private async Task LoadAsync(MusicItem item, bool refresh, double seek, bool autoPlay, bool webm = false, bool forceProof = false)
     {
         long requestGeneration = ++generation;
         loadCancellation?.Cancel();
@@ -192,12 +202,39 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
         pendingSeek = seek;
         playWhenOpened = autoPlay;
         usingWebm = webm;
-        if (!refresh && !webm) { recoveryAttempted = false; webmAttempted = false; }
-        SetStatus(webm ? "TryingOpus" : refresh ? "RefreshingSource" : "PreparingAudio");
+        bool newSelection = !refresh && !webm && !forceProof;
+        if (newSelection)
+        {
+            recoveryAttempted = false;
+            webmAttempted = false;
+            proofRefreshAttempted = false;
+        }
+        bool prepareProof = ensurePo is not null && (forceProof || (newSelection && playbackProofRequired));
+        NativeFailureCode = 0;
+        SetStatus(prepareProof ? "VerifyingPlayback" : webm ? "TryingOpus" : refresh ? "RefreshingSource" : "PreparingAudio");
         WindowsMusicSource? replacement = null;
         MediaSource? directReplacement = null;
+        bool resolvingSource = false;
         try
         {
+            if (prepareProof)
+            {
+                // The host installs video-bound proof only after checking this cancellation token.
+                // Keep preparation in the load task so source changes/account switches drain it.
+                await ensurePo!(item.VideoId!, forceProof, cancellation.Token);
+                cancellation.Token.ThrowIfCancellationRequested();
+                await OnUiAsync(() =>
+                {
+                    if (requestGeneration == generation && !cancellation.IsCancellationRequested)
+                    {
+                        playbackProofRequired = true;
+                        SetStatus(refresh ? "RefreshingSource" : webm ? "TryingOpus" : "PreparingAudio");
+                    }
+                    return Task.CompletedTask;
+                });
+                cancellation.Token.ThrowIfCancellationRequested();
+            }
+            resolvingSource = true;
             if (refresh)
                 await core.CallAsync(new { op = "stream_refresh", video_id = item.VideoId, format = "mp4" }, cancellation.Token);
             if (webm)
@@ -230,8 +267,32 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
                 return Task.CompletedTask;
             });
         }
-        catch (OperationCanceledException) { }
-        catch (Exception error) when (!webm &&
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { }
+        catch (OperationCanceledException)
+        {
+            await OnUiAsync(() =>
+            {
+                if (!disposed && requestGeneration == generation)
+                {
+                    DetachSource();
+                    SetStatus("AudioRequestTimeout", error: true);
+                }
+                return Task.CompletedTask;
+            });
+        }
+        catch (MusicCoreException error) when (error.Code == "po_token_required")
+        {
+            await OnUiAsync(() =>
+            {
+                if (disposed || requestGeneration != generation) return Task.CompletedTask;
+                Task? retry = StartProofRecovery(item, seek, autoPlay);
+                if (retry is not null) return retry;
+                HasError = true;
+                StatusText = Describe(error);
+                return Task.CompletedTask;
+            });
+        }
+        catch (Exception error) when (resolvingSource && !webm &&
             (error is NotSupportedException || error is MusicCoreException { Code: "stream_unavailable" }))
         {
             await OnUiAsync(() =>
@@ -250,7 +311,8 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
                 {
                     DetachSource();
                     HasError = true;
-                    StatusText = Describe(error);
+                    StatusText = !resolvingSource && error is not MusicCoreException
+                        ? localize("PlaybackVerificationFailed") : Describe(error);
                 }
                 return Task.CompletedTask;
             });
@@ -270,6 +332,17 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
                 return Task.CompletedTask;
             });
         }
+    }
+
+    private Task? StartProofRecovery(MusicItem item, double seek, bool autoPlay)
+    {
+        if (ensurePo is null || proofRefreshAttempted || stopping || closing) return null;
+        proofRefreshAttempted = true;
+        recoveryAttempted = true;
+        // AAC may genuinely be unavailable on this host, so a fresh proved source can still
+        // choose Opus once. Neither codec choice resets the proof-attempt counter.
+        webmAttempted = false;
+        return LoadAsync(item, true, seek, autoPlay, forceProof: true);
     }
 
     private Task MoveAsync(int direction, bool automatic)
@@ -328,18 +401,27 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
             if (stopping || closing || observed != generation || !HasSource || Current is null) return Task.CompletedTask;
             // Media Foundation can report CDN HTTP 401/403 as DecodingError.
             int failureCode = args.ExtendedErrorCode?.HResult ?? 0;
-            bool rejectedUrl = failureCode is unchecked((int)0x80190191) or unchecked((int)0x80190193);
+            NativeFailureCode = failureCode;
+            // Windows can wrap an HTTP refusal as SourceNotSupported/NS_E_REFUSED_BY_SERVER.
+            bool rejectedUrl = failureCode is unchecked((int)0x80190191) or unchecked((int)0x80190193)
+                or unchecked((int)0xC00D2EE7);
+            double resume = Math.Max(PositionSeconds, player.PlaybackSession.Position.TotalSeconds);
+            bool resumePlaying = IsPlaying || playWhenOpened;
+            if (rejectedUrl)
+            {
+                Task? proofRetry = StartProofRecovery(Current, resume, resumePlaying);
+                if (proofRetry is not null) return proofRetry;
+            }
             if (!usingWebm && !recoveryAttempted && (args.Error == MediaPlayerError.NetworkError || rejectedUrl))
             {
                 recoveryAttempted = true;
-                double resume = Math.Max(PositionSeconds, player.PlaybackSession.Position.TotalSeconds);
-                return LoadAsync(Current, true, resume, IsPlaying || playWhenOpened);
+                return LoadAsync(Current, true, resume, resumePlaying);
             }
-            if (!usingWebm && !webmAttempted && (rejectedUrl || args.Error is MediaPlayerError.DecodingError or MediaPlayerError.SourceNotSupported))
+            // A CDN refusal affects both formats; changing codec must not hide that cause.
+            if (!rejectedUrl && !usingWebm && !webmAttempted && (args.Error is MediaPlayerError.DecodingError or MediaPlayerError.SourceNotSupported))
             {
                 webmAttempted = true;
-                double resume = Math.Max(PositionSeconds, player.PlaybackSession.Position.TotalSeconds);
-                return LoadAsync(Current, false, resume, IsPlaying || playWhenOpened, webm: true);
+                return LoadAsync(Current, false, resume, resumePlaying, webm: true);
             }
             DetachSource();
             IsBusy = false;
@@ -410,7 +492,8 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
             switch (args.Button)
             {
                 case SystemMediaTransportControlsButton.Play:
-                    if (IsBusy) playWhenOpened = true; else if (HasSource) player.Play();
+                    playWhenOpened = true;
+                    if (!IsBusy && HasSource) player.Play();
                     break;
                 case SystemMediaTransportControlsButton.Pause:
                     playWhenOpened = false;
@@ -445,6 +528,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
         MusicCoreException { Code: "authentication_required" or "authentication_rejected" } => localize("PlaybackSessionExpired"),
         MusicCoreException { Code: "rate_limited" } => localize("PlaybackRateLimited"),
         MusicCoreException { Code: "po_token_required" } => localize("OfficialVerificationRequired"),
+        MusicCoreException { Code: "attestation_failed" or "runtime_missing" } => localize("PlaybackVerificationFailed"),
         MusicCoreException { Code: "timeout" } => localize("AudioRequestTimeout"),
         MusicCoreException { Code: "sabr_required" or "sabr_reload_required" } => localize("SabrNotSupported"),
         MusicCoreException { Code: "unplayable" } => localize("PlaybackSongUnavailable"),

@@ -13,6 +13,7 @@ if (!(Test-Path (Join-Path $repositoryRoot 'external/core/examples/dotnet/YouTub
     throw 'The core submodule is missing. Run: git submodule update --init --recursive'
 }
 & (Join-Path $PSScriptRoot 'bootstrap-core.ps1') -Architecture $Architecture
+& (Join-Path $PSScriptRoot 'bootstrap-po-provider.ps1') -Architecture $Architecture
 $runtimeId = "win-$Architecture"
 $platformName = if ($Architecture -eq 'arm64') { 'ARM64' } else { 'x64' }
 & dotnet restore $projectPath -r $runtimeId "-p:Platform=$platformName"
@@ -23,7 +24,7 @@ if ($Publish) {
     if (!$OutputDirectory) { $OutputDirectory = Join-Path $repositoryRoot "artifacts/ytmusicwinui-$runtimeId" }
     & dotnet publish $projectPath -c $Configuration -r $runtimeId "-p:Platform=$platformName" --no-restore --no-build -o $OutputDirectory
     if ($LASTEXITCODE -ne 0) { throw "Publish failed ($LASTEXITCODE)." }
-    foreach ($required in @('ytmusicwinui.exe', 'ytmusicwinui.pri', 'youtube_music_core.dll', 'Microsoft.UI.Xaml.dll')) {
+    foreach ($required in @('ytmusicwinui.exe', 'ytmusicwinui.pri', 'youtube_music_core.dll', 'Microsoft.UI.Xaml.dll', 'po-provider/node.exe', 'po-provider/worker.cjs', 'po-provider/dist/provider.cjs', 'po-provider/LICENSE', 'po-provider/NODE-LICENSE', 'po-provider/vendor/bgutil/session_manager.ts')) {
         if (!(Test-Path (Join-Path $OutputDirectory $required))) { throw "Published output is missing $required." }
     }
     Copy-Item (Join-Path $repositoryRoot 'LICENSE') $OutputDirectory

@@ -13,6 +13,7 @@ namespace Music.Desktop;
 public sealed partial class MainWindow
 {
     private string? playerRating;
+    private string? playbackNotice;
     private Border CreatePlayer()
     {
         var grid = new Grid { ColumnSpacing = 22, Padding = new Thickness(22, 12, 22, 10) };
@@ -71,10 +72,21 @@ public sealed partial class MainWindow
         }
         playButton.Content = Icon(playback.IsPlaying ? "\uE769" : "\uE768", 17, White); playButton.IsEnabled = current is not null && !playback.IsBusy;
         playStatus.Text = playback.StatusText; ToolTipService.SetToolTip(playStatus, playback.StatusText);
+        if (!playback.HasError && playbackNotice is not null && notice.Message == playbackNotice)
+        {
+            notice.IsOpen = false;
+            playbackNotice = null;
+        }
         if ((args.PropertyName is nameof(PlaybackService.StatusText) or nameof(PlaybackService.IsBusy)) && !playback.IsBusy &&
             playback.HasError)
+        {
+            if (playback.NativeFailureCode != 0)
+                DiagnosticLog.Write("native_playback", new System.Runtime.InteropServices.COMException("", playback.NativeFailureCode));
             ShowNotice(playback.StatusText, InfoBarSeverity.Warning);
+            playbackNotice = playback.StatusText;
+        }
         positionLabel.Text = FormatTime(playback.PositionSeconds); durationLabel.Text = FormatTime(playback.DurationSeconds);
+        seekSlider.IsEnabled = !playback.IsBusy && !playback.HasError && playback.DurationSeconds > 0;
         if (!draggingSeek) { updatingSeek = true; seekSlider.Maximum = Math.Max(1, playback.DurationSeconds); seekSlider.Value = Math.Clamp(playback.PositionSeconds, 0, seekSlider.Maximum); updatingSeek = false; }
         if (args.PropertyName == nameof(PlaybackService.Current) && sidePanel.Visibility == Visibility.Visible && panelMode == "queue") RenderQueue();
     }

@@ -9,6 +9,7 @@ After `scripts/bootstrap-core.ps1 -Architecture x64`:
 
 ```powershell
 dotnet run --project tests/PlaybackSmoke -- --live
+dotnet run --project tests/PlaybackSmoke -- --live --retry
 dotnet run --project tests/PlaybackSmoke -- --live --opus
 dotnet run --project tests/PlaybackSmoke -- --live --full
 ```
@@ -29,3 +30,5 @@ Network availability and public media permissions can change: a passing initial
 anonymous `4D7u5KF7SP8` reference rejected later ranges with HTTP 403, while the
 Rick Astley reference allowed native AAC and Opus playback and seeking. Do not
 replace a failing playback assertion with a successful initial-URL probe.
+
+`--retry` injects one initial source-resolution failure, then verifies that the player button retries and completes real playback. For automatic delivery-proof acquisition and renewal using the production host, use [PlaybackProofSmoke](../PlaybackProofSmoke/README.md).
