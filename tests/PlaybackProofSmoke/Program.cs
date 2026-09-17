@@ -59,6 +59,14 @@ try
             player.MediaFailed += (_, error) => Console.WriteLine($"native_media_failure: hresult=0x{error.ExtendedErrorCode.HResult:X8}");
             var first = new MusicItem { VideoId = videoId, Title = "Silent proof recovery check" };
             var replacement = new MusicItem { VideoId = videoId, Title = "Same-video cache check" };
+            try
+            {
+                await core.CallAsync(new { op = "library", section = "songs" }, lifetime.Token);
+                throw new ProbeFailure("anonymous_library_unexpectedly_allowed");
+            }
+            catch (MusicCoreException error) when (error.Code == "authentication_required") { }
+            Require(!core.IsAuthenticated && core.SessionStatus == "signed_out", "login_requirement_poisoned_anonymous_state");
+            Console.WriteLine("anonymous_library_requires_login_without_rejecting_session: passed");
             Console.WriteLine("initial_track_load: started");
             await playback.PlayAsync(first, [first]);
             Console.WriteLine("initial_track_load: returned");

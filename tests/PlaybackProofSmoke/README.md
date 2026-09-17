@@ -17,7 +17,9 @@ Use `--video VIDEO_ID` to choose another public reference that requires proof.
 A reference that no longer requires proof fails the recovery assertion rather
 than silently turning this into a generic playback check.
 
-The check observes the real service's forced/proactive proof callback, requires
+The check first verifies that an anonymous library request reports a login
+requirement without poisoning the anonymous session state. It then observes the
+real service's forced/proactive proof callback and requires
 15 seconds of advancing native playback after verification, exercises midpoint
 seek and pause, reselects the same video to verify reuse of the cached proof,
 performs five rapid replacements, and checks cancellation/draining and disposal.
