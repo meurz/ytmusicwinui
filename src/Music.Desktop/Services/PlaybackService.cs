@@ -209,44 +209,59 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
                 replacement = await WindowsMusicSource.FromManifestAsync(manifest, cancellation.Token);
             }
             cancellation.Token.ThrowIfCancellationRequested();
-            // Discard any success racing with cancellation, account change or a newer selection.
-            if (disposed || requestGeneration != generation) return;
-            source = replacement;
-            directSource = directReplacement;
-            replacement = null;
-            directReplacement = null;
-            player.Source = source?.Source ?? directSource;
-            UpdateMetadata(item);
-            StatusText = "正在加载音频…";
+            await OnUiAsync(() =>
+            {
+                // Discard success racing with cancellation, account change or a newer selection.
+                if (disposed || requestGeneration != generation || cancellation.IsCancellationRequested)
+                    return Task.CompletedTask;
+                source = replacement;
+                directSource = directReplacement;
+                replacement = null;
+                directReplacement = null;
+                player.Source = source?.Source ?? directSource;
+                UpdateMetadata(item);
+                StatusText = "正在加载音频…";
+                return Task.CompletedTask;
+            });
         }
         catch (OperationCanceledException) { }
-        catch (Exception error) when (!webm && !webmAttempted &&
+        catch (Exception error) when (!webm &&
             (error is NotSupportedException || error is MusicCoreException { Code: "stream_unavailable" }))
         {
-            if (!disposed && requestGeneration == generation)
+            await OnUiAsync(() =>
             {
+                if (disposed || requestGeneration != generation || webmAttempted)
+                    return Task.CompletedTask;
                 webmAttempted = true;
-                await LoadAsync(item, false, seek, autoPlay, webm: true);
-            }
+                return LoadAsync(item, false, seek, autoPlay, webm: true);
+            });
         }
         catch (Exception error)
         {
-            if (!disposed && requestGeneration == generation)
+            await OnUiAsync(() =>
             {
-                DetachSource();
-                StatusText = Describe(error);
-            }
+                if (!disposed && requestGeneration == generation)
+                {
+                    DetachSource();
+                    StatusText = Describe(error);
+                }
+                return Task.CompletedTask;
+            });
         }
         finally
         {
             replacement?.Dispose();
             directReplacement?.Dispose();
-            if (requestGeneration == generation)
+            await OnUiAsync(() =>
             {
-                loadCancellation = null;
-                // MediaOpened clears the busy state after native initialization succeeds.
-                if (!HasSource) IsBusy = false;
-            }
+                if (requestGeneration == generation)
+                {
+                    loadCancellation = null;
+                    // MediaOpened clears the busy state after native initialization succeeds.
+                    if (!HasSource) IsBusy = false;
+                }
+                return Task.CompletedTask;
+            });
         }
     }
 
