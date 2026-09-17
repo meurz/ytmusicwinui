@@ -29,6 +29,7 @@ public sealed class ItemActions
 
 public sealed class MusicItem
 {
+    public override string ToString() => Title;
     public string Title { get; init; } = "";
     public string Subtitle { get; init; } = "";
     public string Kind { get; init; } = "unknown";
