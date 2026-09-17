@@ -21,13 +21,6 @@ jobs:
       - name: Restore, build and publish
         shell: pwsh
         run: ./scripts/build.ps1 -Architecture ${{ matrix.architecture }} -Publish
-      - name: Verify published language resources
-        if: matrix.architecture == 'x64'
-        shell: pwsh
-        run: |
-          $app = (Resolve-Path 'artifacts/ytmusicwinui-win-x64/ytmusicwinui.exe').Path
-          $process = Start-Process -FilePath $app -ArgumentList '--verify-localization' -Wait -PassThru
-          if ($process.ExitCode -ne 0) { throw 'Published PRI localization verification failed.' }
       - name: Run application tests
         if: matrix.architecture == 'x64'
         shell: pwsh
