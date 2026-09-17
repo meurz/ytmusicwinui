@@ -47,7 +47,7 @@ Live signed-in playback and personal library acceptance require a valid account 
 
 ## Verification
 
-Windows x64 and ARM64 packages are built in CI. The Windows contract check exercises actual DPAPI storage, cancellation/corrupt-file preservation and response models. The opt-in [native playback smoke check](tests/PlaybackSmoke/README.md) exercises the real core and MediaPlayer at zero volume; it is compiled but does not access YouTube in CI.
+Windows x64 and ARM64 packages are built in CI. The Windows contract check exercises actual DPAPI storage, cancellation/corrupt-file preservation and response models. The opt-in [native playback smoke check](tests/PlaybackSmoke/README.md) exercises the real core and MediaPlayer at zero volume; it runs locally and is not part of CI. CI is limited to building and packaging the two Windows architectures.
 
 Public-reference playback has been checked for an advancing clock, native seeking, SMTC state, rapid track replacement, stop/cancellation and resource disposal. A successful initial URL probe does not guarantee full delivery: some anonymous tracks reject later ranges, and these errors remain visible rather than being reported as successful playback. Personal-account operations need separate verification after importing a valid session.
 
