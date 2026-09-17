@@ -273,7 +273,10 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
         Observe(Track(OnUiAsync(() =>
         {
             if (stopping || closing || observed != generation || source is null || Current is null) return Task.CompletedTask;
-            if (!recoveryAttempted && args.Error == MediaPlayerError.NetworkError)
+            // Media Foundation can report CDN HTTP 401/403 as DecodingError.
+            int failureCode = args.ExtendedErrorCode?.HResult ?? 0;
+            bool rejectedUrl = failureCode is unchecked((int)0x80190191) or unchecked((int)0x80190193);
+            if (!recoveryAttempted && (args.Error == MediaPlayerError.NetworkError || rejectedUrl))
             {
                 recoveryAttempted = true;
                 double resume = Math.Max(PositionSeconds, player.PlaybackSession.Position.TotalSeconds);
@@ -281,7 +284,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
             }
             DetachSource();
             IsBusy = false;
-            StatusText = args.Error switch
+            StatusText = rejectedUrl ? "音频链接被拒绝，请检查登录状态或网络后重试" : args.Error switch
             {
                 MediaPlayerError.NetworkError => "音频连接失败，请检查网络后重试",
                 MediaPlayerError.DecodingError => "Windows 无法解码这首歌曲的音频",
