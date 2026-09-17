@@ -114,12 +114,6 @@
   <data xml:space="preserve" name="EmptyLibraryDescription">
     <value>試著搜尋喜歡的歌曲，或選擇另一個分類。</value>
   </data>
-  <data xml:space="preserve" name="LoadMoreRecommendations">
-    <value>載入更多推薦</value>
-  </data>
-  <data xml:space="preserve" name="LoadMore">
-    <value>載入更多</value>
-  </data>
   <data xml:space="preserve" name="AllContentLoaded">
     <value>已載入全部內容</value>
   </data>
@@ -404,12 +398,6 @@
   </data>
   <data xml:space="preserve" name="EditablePlaylistNotice">
     <value>只能加入你有編輯權限的播放清單。</value>
-  </data>
-  <data xml:space="preserve" name="LoadMorePlaylists">
-    <value>載入更多播放清單</value>
-  </data>
-  <data xml:space="preserve" name="NoEditablePlaylistsOnPage">
-    <value>這一頁沒有可編輯的播放清單，可以繼續載入。</value>
   </data>
   <data xml:space="preserve" name="NoPlaylistsAvailable">
     <value>目前沒有可用的播放清單，請先在音樂庫中新增。</value>

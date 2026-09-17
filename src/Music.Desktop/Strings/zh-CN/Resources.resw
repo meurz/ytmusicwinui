@@ -114,12 +114,6 @@
   <data xml:space="preserve" name="EmptyLibraryDescription">
     <value>试试搜索喜欢的歌曲，或选择另一个分类。</value>
   </data>
-  <data xml:space="preserve" name="LoadMoreRecommendations">
-    <value>加载更多推荐</value>
-  </data>
-  <data xml:space="preserve" name="LoadMore">
-    <value>加载更多</value>
-  </data>
   <data xml:space="preserve" name="AllContentLoaded">
     <value>已加载全部内容</value>
   </data>
@@ -404,12 +398,6 @@
   </data>
   <data xml:space="preserve" name="EditablePlaylistNotice">
     <value>仅能添加到你有编辑权限的歌单。</value>
-  </data>
-  <data xml:space="preserve" name="LoadMorePlaylists">
-    <value>加载更多歌单</value>
-  </data>
-  <data xml:space="preserve" name="NoEditablePlaylistsOnPage">
-    <value>这一页未找到可编辑歌单，可以继续加载。</value>
   </data>
   <data xml:space="preserve" name="NoPlaylistsAvailable">
     <value>尚无可用歌单，请先在音乐库中新建。</value>

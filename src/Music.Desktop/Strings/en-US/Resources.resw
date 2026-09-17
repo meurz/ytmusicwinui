@@ -114,12 +114,6 @@
   <data xml:space="preserve" name="EmptyLibraryDescription">
     <value>Search for a favorite song, or try another category.</value>
   </data>
-  <data xml:space="preserve" name="LoadMoreRecommendations">
-    <value>Load more recommendations</value>
-  </data>
-  <data xml:space="preserve" name="LoadMore">
-    <value>Load more</value>
-  </data>
   <data xml:space="preserve" name="AllContentLoaded">
     <value>All content loaded</value>
   </data>
@@ -404,12 +398,6 @@
   </data>
   <data xml:space="preserve" name="EditablePlaylistNotice">
     <value>You can only add songs to playlists you can edit.</value>
-  </data>
-  <data xml:space="preserve" name="LoadMorePlaylists">
-    <value>Load more playlists</value>
-  </data>
-  <data xml:space="preserve" name="NoEditablePlaylistsOnPage">
-    <value>No editable playlists on this page. You can load more.</value>
   </data>
   <data xml:space="preserve" name="NoPlaylistsAvailable">
     <value>No playlists are available. Create one in your library first.</value>
