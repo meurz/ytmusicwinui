@@ -79,6 +79,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
     public bool IsPlaying { get => isPlaying; private set => SetProperty(ref isPlaying, value); }
     public bool IsBusy { get => isBusy; private set => SetProperty(ref isBusy, value); }
     public bool HasError { get => hasError; private set => SetProperty(ref hasError, value); }
+    public int NativeFailureCode { get; private set; }
     public string StatusText { get => statusText; private set => SetProperty(ref statusText, value); }
     public double PositionSeconds { get => positionSeconds; private set => SetProperty(ref positionSeconds, value); }
     public double DurationSeconds { get => durationSeconds; private set => SetProperty(ref durationSeconds, value); }
@@ -119,7 +120,11 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
     public void TogglePlayPause() => Post(() =>
     {
         if (IsBusy) { playWhenOpened = !playWhenOpened; return; }
-        if (!HasSource) return;
+        if (!HasSource)
+        {
+            if (Current is not null) Observe(Track(LoadAsync(Current, false, 0, true)));
+            return;
+        }
         playWhenOpened = !IsPlaying;
         if (IsPlaying) player.Pause(); else player.Play();
     });
@@ -193,6 +198,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
         playWhenOpened = autoPlay;
         usingWebm = webm;
         if (!refresh && !webm) { recoveryAttempted = false; webmAttempted = false; }
+        NativeFailureCode = 0;
         SetStatus(webm ? "TryingOpus" : refresh ? "RefreshingSource" : "PreparingAudio");
         WindowsMusicSource? replacement = null;
         MediaSource? directReplacement = null;
@@ -328,7 +334,10 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
             if (stopping || closing || observed != generation || !HasSource || Current is null) return Task.CompletedTask;
             // Media Foundation can report CDN HTTP 401/403 as DecodingError.
             int failureCode = args.ExtendedErrorCode?.HResult ?? 0;
-            bool rejectedUrl = failureCode is unchecked((int)0x80190191) or unchecked((int)0x80190193);
+            NativeFailureCode = failureCode;
+            // Windows can wrap an HTTP refusal as SourceNotSupported/NS_E_REFUSED_BY_SERVER.
+            bool rejectedUrl = failureCode is unchecked((int)0x80190191) or unchecked((int)0x80190193)
+                or unchecked((int)0xC00D2EE7);
             if (!usingWebm && !recoveryAttempted && (args.Error == MediaPlayerError.NetworkError || rejectedUrl))
             {
                 recoveryAttempted = true;
