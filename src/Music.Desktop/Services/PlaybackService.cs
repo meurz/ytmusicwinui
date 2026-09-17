@@ -14,6 +14,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
 {
     private readonly CoreService core;
     private readonly DispatcherQueue dispatcher;
+    private readonly Func<string, string> localize;
     private readonly MediaPlayer player = new() { AutoPlay = false };
     private readonly DispatcherQueueTimer timer;
     private readonly SystemMediaTransportControls systemControls;
@@ -35,17 +36,20 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
     private MusicItem? current;
     private bool isPlaying;
     private bool isBusy;
+    private bool hasError;
     private bool shuffle;
     private int repeatMode;
     private double positionSeconds;
     private double durationSeconds;
     private double volume = .75;
-    private string statusText = "选择一首歌曲开始播放";
+    private string statusText;
 
-    public PlaybackService(CoreService core, DispatcherQueue dispatcher)
+    public PlaybackService(CoreService core, DispatcherQueue dispatcher, Func<string, string>? localize = null)
     {
         this.core = core;
         this.dispatcher = dispatcher;
+        this.localize = localize ?? (static key => key);
+        statusText = this.localize("ChooseTrackToStart");
         if (!dispatcher.HasThreadAccess)
             throw new InvalidOperationException("Create playback on the window dispatcher thread.");
         player.Volume = volume;
@@ -74,6 +78,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
     public MusicItem? Current { get => current; private set => SetProperty(ref current, value); }
     public bool IsPlaying { get => isPlaying; private set => SetProperty(ref isPlaying, value); }
     public bool IsBusy { get => isBusy; private set => SetProperty(ref isBusy, value); }
+    public bool HasError { get => hasError; private set => SetProperty(ref hasError, value); }
     public string StatusText { get => statusText; private set => SetProperty(ref statusText, value); }
     public double PositionSeconds { get => positionSeconds; private set => SetProperty(ref positionSeconds, value); }
     public double DurationSeconds { get => durationSeconds; private set => SetProperty(ref durationSeconds, value); }
@@ -98,7 +103,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
             if (stopping || closing) return Task.CompletedTask;
             if (!IsPlayable(item))
             {
-                StatusText = "这个条目无法直接播放，请打开歌单或专辑";
+                SetStatus("ItemNotPlayable", error: true);
                 return Task.CompletedTask;
             }
             if (items is not null)
@@ -128,7 +133,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
 
     public void Enqueue(MusicItem item) => Post(() =>
     {
-        if (IsPlayable(item)) { Queue.Add(item); StatusText = "已加入播放队列"; }
+        if (IsPlayable(item)) { Queue.Add(item); SetStatus("AddedToQueue"); }
     });
 
     public void Seek(double seconds) => Post(() =>
@@ -158,7 +163,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
             PositionSeconds = 0;
             DurationSeconds = 0;
             IsBusy = false;
-            StatusText = "已停止播放";
+            SetStatus("PlaybackStopped");
             systemControls.PlaybackStatus = MediaPlaybackStatus.Stopped;
             systemControls.DisplayUpdater.ClearAll();
             systemControls.DisplayUpdater.Update();
@@ -182,12 +187,13 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
         Current = item;
         PositionSeconds = seek;
         DurationSeconds = 0;
+        HasError = false;
         IsBusy = true;
         pendingSeek = seek;
         playWhenOpened = autoPlay;
         usingWebm = webm;
         if (!refresh && !webm) { recoveryAttempted = false; webmAttempted = false; }
-        StatusText = webm ? "正在尝试 Opus 音频…" : refresh ? "正在重新获取播放源…" : "正在准备音频…";
+        SetStatus(webm ? "TryingOpus" : refresh ? "RefreshingSource" : "PreparingAudio");
         WindowsMusicSource? replacement = null;
         MediaSource? directReplacement = null;
         try
@@ -220,7 +226,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
                 directReplacement = null;
                 player.Source = source?.Source ?? directSource;
                 UpdateMetadata(item);
-                StatusText = "正在加载音频…";
+                SetStatus("LoadingAudio");
                 return Task.CompletedTask;
             });
         }
@@ -243,6 +249,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
                 if (!disposed && requestGeneration == generation)
                 {
                     DetachSource();
+                    HasError = true;
                     StatusText = Describe(error);
                 }
                 return Task.CompletedTask;
@@ -283,7 +290,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
             if (RepeatMode == 1) next = (next + Queue.Count) % Queue.Count;
             else
             {
-                if (automatic) { player.Pause(); IsPlaying = false; StatusText = "队列已播放完毕"; }
+                if (automatic) { player.Pause(); IsPlaying = false; SetStatus("QueueFinished"); }
                 return Task.CompletedTask;
             }
         }
@@ -302,7 +309,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
                 player.PlaybackSession.Position = TimeSpan.FromSeconds(Math.Min(pendingSeek, Math.Max(0, DurationSeconds - .1)));
             pendingSeek = 0;
             if (playWhenOpened) player.Play();
-            StatusText = playWhenOpened ? "正在播放" : "已暂停";
+            SetStatus(playWhenOpened ? "Playing" : "Paused");
             UpdateTimeline();
         });
     }
@@ -336,13 +343,13 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
             }
             DetachSource();
             IsBusy = false;
-            StatusText = rejectedUrl ? "音频链接被拒绝，请检查登录状态或网络后重试" : args.Error switch
+            SetStatus(rejectedUrl ? "AudioLinkRejected" : args.Error switch
             {
-                MediaPlayerError.NetworkError => "音频连接失败，请检查网络后重试",
-                MediaPlayerError.DecodingError => "Windows 无法解码这首歌曲的音频",
-                MediaPlayerError.SourceNotSupported => "Windows 不支持这个音频源",
-                _ => "播放失败，请重新选择歌曲重试"
-            };
+                MediaPlayerError.NetworkError => "AudioConnectionFailed",
+                MediaPlayerError.DecodingError => "AudioDecodingFailed",
+                MediaPlayerError.SourceNotSupported => "AudioSourceUnsupported",
+                _ => "PlaybackFailedSelectAgain"
+            }, error: true);
             return Task.CompletedTask;
         })));
     }
@@ -358,7 +365,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
             _ => MediaPlaybackStatus.Stopped
         };
         if (!IsBusy && HasSource)
-            StatusText = IsPlaying ? "正在播放" : sender.PlaybackState == MediaPlaybackState.Buffering ? "正在缓冲…" : "已暂停";
+            SetStatus(IsPlaying ? "Playing" : sender.PlaybackState == MediaPlaybackState.Buffering ? "Buffering" : "Paused");
     });
 
     private void TimerTick(DispatcherQueueTimer sender, object args)
@@ -370,7 +377,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
             DurationSeconds = Math.Max(0, player.PlaybackSession.NaturalDuration.TotalSeconds);
             UpdateTimeline();
         }
-        catch (Exception) { StatusText = "暂时无法读取播放进度"; }
+        catch (Exception) { SetStatus("PositionReadFailed", error: true); }
     }
 
     private void UpdateMetadata(MusicItem item)
@@ -427,17 +434,23 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
     }
 
     private static bool IsPlayable(MusicItem item) => item.Available != false && !string.IsNullOrWhiteSpace(item.VideoId);
-    private static string Describe(Exception error) => error switch
+    private void SetStatus(string resourceKey, bool error = false)
     {
-        MusicCoreException { Code: "authentication_required" or "authentication_rejected" } => "登录已失效，请重新导入 Cookie",
-        MusicCoreException { Code: "rate_limited" } => "请求过于频繁，请稍后再试",
-        MusicCoreException { Code: "po_token_required" } => "这首歌曲需要额外的官方播放验证，暂时无法播放",
-        MusicCoreException { Code: "timeout" } => "获取音频超时，请重试",
-        MusicCoreException { Code: "sabr_required" or "sabr_reload_required" } => "这首歌曲需要 SABR 音频，目前客户端尚未接入",
-        MusicCoreException { Code: "unplayable" } => "这首歌曲当前无法播放",
-        MusicCoreException { Code: "stream_unavailable" } => "这首歌曲暂时没有可用的 AAC 音频源",
-        NotSupportedException => "当前 Windows 系统不支持 DASH 音频播放",
-        _ => "无法加载音频，请检查登录状态或网络后重试"
+        HasError = error;
+        StatusText = localize(resourceKey);
+    }
+
+    private string Describe(Exception error) => error switch
+    {
+        MusicCoreException { Code: "authentication_required" or "authentication_rejected" } => localize("PlaybackSessionExpired"),
+        MusicCoreException { Code: "rate_limited" } => localize("PlaybackRateLimited"),
+        MusicCoreException { Code: "po_token_required" } => localize("OfficialVerificationRequired"),
+        MusicCoreException { Code: "timeout" } => localize("AudioRequestTimeout"),
+        MusicCoreException { Code: "sabr_required" or "sabr_reload_required" } => localize("SabrNotSupported"),
+        MusicCoreException { Code: "unplayable" } => localize("PlaybackSongUnavailable"),
+        MusicCoreException { Code: "stream_unavailable" } => localize("NoAacSource"),
+        NotSupportedException => localize("DashUnsupported"),
+        _ => localize("AudioLoadFailed")
     };
 
     private Task Track(Task task)
@@ -457,7 +470,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
     {
         try { await task; }
         catch (OperationCanceledException) { }
-        catch (Exception) { Post(() => StatusText = "播放操作失败，请重试"); }
+        catch (Exception) { Post(() => SetStatus("PlaybackOperationFailed", error: true)); }
     }
 
     private void Post(Action action)
@@ -466,7 +479,7 @@ public sealed class PlaybackService : ObservableObject, IAsyncDisposable
         {
             if (disposed || stopping || closing) return;
             try { action(); }
-            catch (Exception) { StatusText = "播放操作失败，请重试"; }
+            catch (Exception) { SetStatus("PlaybackOperationFailed", error: true); }
         }
         if (dispatcher.HasThreadAccess) SafeAction();
         else dispatcher.TryEnqueue(SafeAction);
