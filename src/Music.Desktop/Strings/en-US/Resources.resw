@@ -1,0 +1,660 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data xml:space="preserve" name="SearchPlaceholder">
+    <value>Search songs, artists, or playlists</value>
+  </data>
+  <data xml:space="preserve" name="Back">
+    <value>Back</value>
+  </data>
+  <data xml:space="preserve" name="HomeTitle">
+    <value>Good music. Take your time.</value>
+  </data>
+  <data xml:space="preserve" name="SelectSongForLyrics">
+    <value>Choose a song to see its lyrics</value>
+  </data>
+  <data xml:space="preserve" name="SelectSongToPlay">
+    <value>Choose a song to start listening</value>
+  </data>
+  <data xml:space="preserve" name="PlayPause">
+    <value>Play or pause</value>
+  </data>
+  <data xml:space="preserve" name="LikeCurrentSong">
+    <value>Like the current song</value>
+  </data>
+  <data xml:space="preserve" name="Shuffle">
+    <value>Shuffle</value>
+  </data>
+  <data xml:space="preserve" name="RepeatMode">
+    <value>Repeat mode</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackQueue">
+    <value>Queue</value>
+  </data>
+  <data xml:space="preserve" name="Lyrics">
+    <value>Lyrics</value>
+  </data>
+  <data xml:space="preserve" name="RefreshPage">
+    <value>Refresh page</value>
+  </data>
+  <data xml:space="preserve" name="WelcomeBack">
+    <value>Welcome back</value>
+  </data>
+  <data xml:space="preserve" name="ConnectingMusic">
+    <value>Connecting to your music…</value>
+  </data>
+  <data xml:space="preserve" name="Home">
+    <value>Home</value>
+  </data>
+  <data xml:space="preserve" name="Explore">
+    <value>Explore</value>
+  </data>
+  <data xml:space="preserve" name="Library">
+    <value>Library</value>
+  </data>
+  <data xml:space="preserve" name="MyCollection">
+    <value>My collection</value>
+  </data>
+  <data xml:space="preserve" name="LikedMusic">
+    <value>Liked music</value>
+  </data>
+  <data xml:space="preserve" name="RecentlyPlayed">
+    <value>Recently played</value>
+  </data>
+  <data xml:space="preserve" name="ExploreTitle">
+    <value>Find your next favorite</value>
+  </data>
+  <data xml:space="preserve" name="ImportAccount">
+    <value>Import account</value>
+  </data>
+  <data xml:space="preserve" name="SavedSessionUnavailable">
+    <value>Your saved session is unavailable. Import it again; you can still search public music.</value>
+  </data>
+  <data xml:space="preserve" name="Loading">
+    <value>Loading…</value>
+  </data>
+  <data xml:space="preserve" name="PageLoadFailed">
+    <value>This page could not be loaded</value>
+  </data>
+  <data xml:space="preserve" name="Reload">
+    <value>Reload</value>
+  </data>
+  <data xml:space="preserve" name="HomeDescription">
+    <value>Start your day with a song you love.</value>
+  </data>
+  <data xml:space="preserve" name="ExploreDescription">
+    <value>There is more to discover beyond your favorites.</value>
+  </data>
+  <data xml:space="preserve" name="LibraryDescription">
+    <value>Keep the music that moves you.</value>
+  </data>
+  <data xml:space="preserve" name="LikedMusicDescription">
+    <value>Every song you loved, all in one place.</value>
+  </data>
+  <data xml:space="preserve" name="SearchResultCount">
+    <value>Search results · {0} items</value>
+  </data>
+  <data xml:space="preserve" name="ItemCount">
+    <value>{0} items</value>
+  </data>
+  <data xml:space="preserve" name="EmptyLibraryTitle">
+    <value>No music here yet</value>
+  </data>
+  <data xml:space="preserve" name="EmptyLibraryDescription">
+    <value>Search for a favorite song, or try another category.</value>
+  </data>
+  <data xml:space="preserve" name="LoadMoreRecommendations">
+    <value>Load more recommendations</value>
+  </data>
+  <data xml:space="preserve" name="LoadMore">
+    <value>Load more</value>
+  </data>
+  <data xml:space="preserve" name="AllContentLoaded">
+    <value>All content loaded</value>
+  </data>
+  <data xml:space="preserve" name="LibraryTitle">
+    <value>A space for your music.</value>
+  </data>
+  <data xml:space="preserve" name="Playlists">
+    <value>Playlists</value>
+  </data>
+  <data xml:space="preserve" name="Songs">
+    <value>Songs</value>
+  </data>
+  <data xml:space="preserve" name="Albums">
+    <value>Albums</value>
+  </data>
+  <data xml:space="preserve" name="Artists">
+    <value>Artists</value>
+  </data>
+  <data xml:space="preserve" name="Subscriptions">
+    <value>Subscriptions</value>
+  </data>
+  <data xml:space="preserve" name="NewPlaylistShortcut">
+    <value>＋ New playlist</value>
+  </data>
+  <data xml:space="preserve" name="All">
+    <value>All</value>
+  </data>
+  <data xml:space="preserve" name="Videos">
+    <value>Videos</value>
+  </data>
+  <data xml:space="preserve" name="SongUnavailable">
+    <value>This song is currently unavailable</value>
+  </data>
+  <data xml:space="preserve" name="RecentTitle">
+    <value>Give it another listen.</value>
+  </data>
+  <data xml:space="preserve" name="RecentDescription">
+    <value>Music played during this app session</value>
+  </data>
+  <data xml:space="preserve" name="RecentEmpty">
+    <value>Play a song and it will appear here.</value>
+  </data>
+  <data xml:space="preserve" name="WelcomeTitle">
+    <value>Welcome to ytmusicwinui</value>
+  </data>
+  <data xml:space="preserve" name="WelcomeDescription">
+    <value>Search public music, or import your account to view your library.</value>
+  </data>
+  <data xml:space="preserve" name="RetryConnection">
+    <value>Retry connection</value>
+  </data>
+  <data xml:space="preserve" name="ImportCardTitle">
+    <value>Bring your music with you.</value>
+  </data>
+  <data xml:space="preserve" name="ImportCardDescription">
+    <value>Import a signed-in YouTube Music session to see your playlists and collection.</value>
+  </data>
+  <data xml:space="preserve" name="AccountRequired">
+    <value>Import your account to access your library.</value>
+  </data>
+  <data xml:space="preserve" name="SessionExpired">
+    <value>Your account session has expired. Import a new signed-in session.</value>
+  </data>
+  <data xml:space="preserve" name="ConnectionTimeout">
+    <value>The connection timed out. Try again later; preparing the first track may take longer.</value>
+  </data>
+  <data xml:space="preserve" name="RateLimited">
+    <value>Too many requests. Try again later.</value>
+  </data>
+  <data xml:space="preserve" name="MutationOutcomeUnknown">
+    <value>The server may have saved this change. Refresh to check before submitting it again.</value>
+  </data>
+  <data xml:space="preserve" name="WebVerificationRequired">
+    <value>This song requires additional web verification and cannot be played by this native client yet.</value>
+  </data>
+  <data xml:space="preserve" name="LyricsUnavailable">
+    <value>Lyrics are not available for this song.</value>
+  </data>
+  <data xml:space="preserve" name="NetworkUnavailable">
+    <value>The network is unavailable. Check your connection and try again.</value>
+  </data>
+  <data xml:space="preserve" name="OperationFailedCode">
+    <value>The operation failed ({0}). Refresh the page and try again.</value>
+  </data>
+  <data xml:space="preserve" name="CoreNotFound">
+    <value>The matching music core was not found. Use the complete Windows release package.</value>
+  </data>
+  <data xml:space="preserve" name="OperationFailed">
+    <value>The operation could not be completed. Try again later.</value>
+  </data>
+  <data xml:space="preserve" name="Confirm">
+    <value>OK</value>
+  </data>
+  <data xml:space="preserve" name="Cancel">
+    <value>Cancel</value>
+  </data>
+  <data xml:space="preserve" name="CoreNotReady">
+    <value>The music core is not ready. Try again shortly.</value>
+  </data>
+  <data xml:space="preserve" name="ImportAccountExplanation">
+    <value>Use the YouTube Music account signed in to your browser. This app will not ask for your Google password.</value>
+  </data>
+  <data xml:space="preserve" name="OpenYouTubeMusic">
+    <value>Open YouTube Music</value>
+  </data>
+  <data xml:space="preserve" name="CookieImportInstructions">
+    <value>In your browser's developer tools, open Network, select a music.youtube.com request, and paste its Cookie request-header value below.</value>
+  </data>
+  <data xml:space="preserve" name="CookiePlaceholder">
+    <value>Paste the Cookie value</value>
+  </data>
+  <data xml:space="preserve" name="SessionStorageExplanation">
+    <value>Your session is stored only on this computer, encrypted for your Windows account. Import it again if your sign-in expires.</value>
+  </data>
+  <data xml:space="preserve" name="ImportMusicAccount">
+    <value>Import music account</value>
+  </data>
+  <data xml:space="preserve" name="VerifyAndImport">
+    <value>Verify and import</value>
+  </data>
+  <data xml:space="preserve" name="CookieRequired">
+    <value>Paste the Cookie value first.</value>
+  </data>
+  <data xml:space="preserve" name="VerifyingAccount">
+    <value>Verifying your account and saving it securely…</value>
+  </data>
+  <data xml:space="preserve" name="ImportCancelled">
+    <value>Import cancelled.</value>
+  </data>
+  <data xml:space="preserve" name="ImportFailed">
+    <value>Import failed. Make sure the Cookie was copied in full from a signed-in Music page, then try again.</value>
+  </data>
+  <data xml:space="preserve" name="AccountImported">
+    <value>Account imported. Your session will be maintained automatically.</value>
+  </data>
+  <data xml:space="preserve" name="CurrentAccountPrefix">
+    <value>Current account: </value>
+  </data>
+  <data xml:space="preserve" name="SelectMusicProfile">
+    <value>Choose a music profile</value>
+  </data>
+  <data xml:space="preserve" name="MusicAccount">
+    <value>Music account</value>
+  </data>
+  <data xml:space="preserve" name="ProfileUnavailableExplanation">
+    <value>If a profile cannot be switched here, select it in your browser and import it again.</value>
+  </data>
+  <data xml:space="preserve" name="Account">
+    <value>Account</value>
+  </data>
+  <data xml:space="preserve" name="SwitchProfile">
+    <value>Switch profile</value>
+  </data>
+  <data xml:space="preserve" name="Return">
+    <value>Back</value>
+  </data>
+  <data xml:space="preserve" name="SignOutCurrentAccount">
+    <value>Sign out of this account</value>
+  </data>
+  <data xml:space="preserve" name="SignOutExplanation">
+    <value>Remove the music session saved on this computer. Your Google sign-in in the browser will not be affected.</value>
+  </data>
+  <data xml:space="preserve" name="SignOutAccount">
+    <value>Sign out</value>
+  </data>
+  <data xml:space="preserve" name="SignedOut">
+    <value>Signed out</value>
+  </data>
+  <data xml:space="preserve" name="Settings">
+    <value>Settings</value>
+  </data>
+  <data xml:space="preserve" name="SettingsTitle">
+    <value>Make music feel like home.</value>
+  </data>
+  <data xml:space="preserve" name="SettingsDescription">
+    <value>Account, playback, and app information</value>
+  </data>
+  <data xml:space="preserve" name="NotSignedIn">
+    <value>Not signed in</value>
+  </data>
+  <data xml:space="preserve" name="ImportSessionDescription">
+    <value>Import a music session from the signed-in official website</value>
+  </data>
+  <data xml:space="preserve" name="ImportSession">
+    <value>Import session</value>
+  </data>
+  <data xml:space="preserve" name="MusicProfile">
+    <value>Music profile</value>
+  </data>
+  <data xml:space="preserve" name="MusicProfileDescription">
+    <value>Switch between accounts or channels available in this session</value>
+  </data>
+  <data xml:space="preserve" name="Manage">
+    <value>Manage</value>
+  </data>
+  <data xml:space="preserve" name="SessionMaintenance">
+    <value>Session maintenance</value>
+  </data>
+  <data xml:space="preserve" name="SessionMaintenanceDescription">
+    <value>Check and save valid session updates every 10 minutes while the app is open</value>
+  </data>
+  <data xml:space="preserve" name="RefreshNow">
+    <value>Refresh now</value>
+  </data>
+  <data xml:space="preserve" name="SessionRefreshed">
+    <value>Session refreshed and saved</value>
+  </data>
+  <data xml:space="preserve" name="ClearLocalSession">
+    <value>Clear local session</value>
+  </data>
+  <data xml:space="preserve" name="ClearSessionDescription">
+    <value>Remove the saved session even when offline or your sign-in has expired</value>
+  </data>
+  <data xml:space="preserve" name="SignOut">
+    <value>Sign out</value>
+  </data>
+  <data xml:space="preserve" name="Playback">
+    <value>Playback</value>
+  </data>
+  <data xml:space="preserve" name="WindowsNativeAudio">
+    <value>Windows native audio</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackFeatures">
+    <value>AAC/DASH adaptive playback · Opus audio · System media keys · Queue and repeat</value>
+  </data>
+  <data xml:space="preserve" name="Automatic">
+    <value>Automatic</value>
+  </data>
+  <data xml:space="preserve" name="QueueDescription">
+    <value>Right-click a song to add it to the queue; use the queue button at the bottom to view it</value>
+  </data>
+  <data xml:space="preserve" name="OpenQueue">
+    <value>Open queue</value>
+  </data>
+  <data xml:space="preserve" name="About">
+    <value>About</value>
+  </data>
+  <data xml:space="preserve" name="UnofficialDisclaimer">
+    <value>An unofficial client, not affiliated with Google or YouTube. Some regions or restricted songs may not be playable.</value>
+  </data>
+  <data xml:space="preserve" name="PlaylistTitlePlaceholder">
+    <value>For example: Weekend walks</value>
+  </data>
+  <data xml:space="preserve" name="PlaylistDescriptionPlaceholder">
+    <value>Add a description to your playlist (optional)</value>
+  </data>
+  <data xml:space="preserve" name="NewPlaylistDescription">
+    <value>Give your next collection of songs a name.</value>
+  </data>
+  <data xml:space="preserve" name="PrivatePlaylistNotice">
+    <value>New playlists are private by default.</value>
+  </data>
+  <data xml:space="preserve" name="NewPlaylist">
+    <value>New playlist</value>
+  </data>
+  <data xml:space="preserve" name="Create">
+    <value>Create</value>
+  </data>
+  <data xml:space="preserve" name="PlaylistCreated">
+    <value>Playlist created</value>
+  </data>
+  <data xml:space="preserve" name="RenamePlaylist">
+    <value>Rename playlist</value>
+  </data>
+  <data xml:space="preserve" name="Save">
+    <value>Save</value>
+  </data>
+  <data xml:space="preserve" name="DeletePlaylist">
+    <value>Delete playlist</value>
+  </data>
+  <data xml:space="preserve" name="DeletePlaylistConfirmation">
+    <value>Delete “{0}”? This change will be synced to your music account.</value>
+  </data>
+  <data xml:space="preserve" name="Delete">
+    <value>Delete</value>
+  </data>
+  <data xml:space="preserve" name="PlaylistDeleted">
+    <value>Playlist deleted</value>
+  </data>
+  <data xml:space="preserve" name="SelectPlaylist">
+    <value>Choose a playlist</value>
+  </data>
+  <data xml:space="preserve" name="EditablePlaylistNotice">
+    <value>You can only add songs to playlists you can edit.</value>
+  </data>
+  <data xml:space="preserve" name="LoadMorePlaylists">
+    <value>Load more playlists</value>
+  </data>
+  <data xml:space="preserve" name="NoEditablePlaylistsOnPage">
+    <value>No editable playlists on this page. You can load more.</value>
+  </data>
+  <data xml:space="preserve" name="NoPlaylistsAvailable">
+    <value>No playlists are available. Create one in your library first.</value>
+  </data>
+  <data xml:space="preserve" name="AddToPlaylist">
+    <value>Add to playlist</value>
+  </data>
+  <data xml:space="preserve" name="Add">
+    <value>Add</value>
+  </data>
+  <data xml:space="preserve" name="PlaylistNotEditable">
+    <value>You cannot edit this playlist. Choose one of your own.</value>
+  </data>
+  <data xml:space="preserve" name="AddedToPlaylist">
+    <value>Added to playlist</value>
+  </data>
+  <data xml:space="preserve" name="RemoveSong">
+    <value>Remove song</value>
+  </data>
+  <data xml:space="preserve" name="RemoveSongConfirmation">
+    <value>Remove “{0}” from this playlist?</value>
+  </data>
+  <data xml:space="preserve" name="Remove">
+    <value>Remove</value>
+  </data>
+  <data xml:space="preserve" name="PreviousTrack">
+    <value>Previous track</value>
+  </data>
+  <data xml:space="preserve" name="NextTrack">
+    <value>Next track</value>
+  </data>
+  <data xml:space="preserve" name="RepeatOff">
+    <value>Repeat off</value>
+  </data>
+  <data xml:space="preserve" name="RepeatAll">
+    <value>Repeat all</value>
+  </data>
+  <data xml:space="preserve" name="RepeatOne">
+    <value>Repeat one</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackPosition">
+    <value>Playback position</value>
+  </data>
+  <data xml:space="preserve" name="MuteToggle">
+    <value>Mute or unmute</value>
+  </data>
+  <data xml:space="preserve" name="Volume">
+    <value>Volume</value>
+  </data>
+  <data xml:space="preserve" name="CloseSidebar">
+    <value>Close sidebar</value>
+  </data>
+  <data xml:space="preserve" name="QueueSongCount">
+    <value>{0} songs</value>
+  </data>
+  <data xml:space="preserve" name="QueueEmpty">
+    <value>Play a song, or right-click one to add it to the queue.</value>
+  </data>
+  <data xml:space="preserve" name="LoadingLyrics">
+    <value>Loading lyrics…</value>
+  </data>
+  <data xml:space="preserve" name="NoLyrics">
+    <value>No lyrics available</value>
+  </data>
+  <data xml:space="preserve" name="ForThisMoment">
+    <value>For this moment</value>
+  </data>
+  <data xml:space="preserve" name="FeatureDescription">
+    <value>Let the music play. Take a moment for yourself.</value>
+  </data>
+  <data xml:space="preserve" name="OpenPlaylistShortcut">
+    <value>Open playlist  ›</value>
+  </data>
+  <data xml:space="preserve" name="PlayNowShortcut">
+    <value>▶  Play now</value>
+  </data>
+  <data xml:space="preserve" name="AddToQueue">
+    <value>Add to queue</value>
+  </data>
+  <data xml:space="preserve" name="AddedToQueue">
+    <value>Added to queue</value>
+  </data>
+  <data xml:space="preserve" name="Unlike">
+    <value>Unlike</value>
+  </data>
+  <data xml:space="preserve" name="Like">
+    <value>Like</value>
+  </data>
+  <data xml:space="preserve" name="AddToPlaylistDialog">
+    <value>Add to playlist…</value>
+  </data>
+  <data xml:space="preserve" name="CopySongLink">
+    <value>Copy song link</value>
+  </data>
+  <data xml:space="preserve" name="SongLinkCopied">
+    <value>Song link copied</value>
+  </data>
+  <data xml:space="preserve" name="RemoveFromPlaylist">
+    <value>Remove from playlist</value>
+  </data>
+  <data xml:space="preserve" name="MoveToPlaylistEnd">
+    <value>Move to end of playlist</value>
+  </data>
+  <data xml:space="preserve" name="Open">
+    <value>Open</value>
+  </data>
+  <data xml:space="preserve" name="SaveToLibrary">
+    <value>Save to library</value>
+  </data>
+  <data xml:space="preserve" name="RemoveFromLibrary">
+    <value>Remove from library</value>
+  </data>
+  <data xml:space="preserve" name="Unsubscribe">
+    <value>Unsubscribe</value>
+  </data>
+  <data xml:space="preserve" name="SubscribeArtist">
+    <value>Subscribe to artist</value>
+  </data>
+  <data xml:space="preserve" name="PlayAllShortcut">
+    <value>▶  Play all</value>
+  </data>
+  <data xml:space="preserve" name="EnqueueAllShortcut">
+    <value>＋ Add to queue</value>
+  </data>
+  <data xml:space="preserve" name="EditPlaylist">
+    <value>Edit playlist</value>
+  </data>
+  <data xml:space="preserve" name="UnsavePlaylist">
+    <value>Remove from collection</value>
+  </data>
+  <data xml:space="preserve" name="SavePlaylist">
+    <value>Save playlist</value>
+  </data>
+  <data xml:space="preserve" name="SongLiked">
+    <value>Song liked</value>
+  </data>
+  <data xml:space="preserve" name="SongUnliked">
+    <value>Song unliked</value>
+  </data>
+  <data xml:space="preserve" name="ChangeSavedReloaded">
+    <value>Change submitted and page refreshed</value>
+  </data>
+  <data xml:space="preserve" name="ChooseTrackToStart">
+    <value>Choose a song to start playing</value>
+  </data>
+  <data xml:space="preserve" name="ItemNotPlayable">
+    <value>This item cannot be played directly. Open the playlist or album.</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackStopped">
+    <value>Playback stopped</value>
+  </data>
+  <data xml:space="preserve" name="TryingOpus">
+    <value>Trying Opus audio…</value>
+  </data>
+  <data xml:space="preserve" name="RefreshingSource">
+    <value>Refreshing the audio source…</value>
+  </data>
+  <data xml:space="preserve" name="PreparingAudio">
+    <value>Preparing audio…</value>
+  </data>
+  <data xml:space="preserve" name="LoadingAudio">
+    <value>Loading audio…</value>
+  </data>
+  <data xml:space="preserve" name="QueueFinished">
+    <value>The queue has finished playing</value>
+  </data>
+  <data xml:space="preserve" name="Playing">
+    <value>Playing</value>
+  </data>
+  <data xml:space="preserve" name="Paused">
+    <value>Paused</value>
+  </data>
+  <data xml:space="preserve" name="AudioLinkRejected">
+    <value>The audio link was rejected. Check your sign-in or connection and try again.</value>
+  </data>
+  <data xml:space="preserve" name="AudioConnectionFailed">
+    <value>The audio connection failed. Check your network and try again.</value>
+  </data>
+  <data xml:space="preserve" name="AudioDecodingFailed">
+    <value>Windows could not decode this song's audio</value>
+  </data>
+  <data xml:space="preserve" name="AudioSourceUnsupported">
+    <value>Windows does not support this audio source</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackFailedSelectAgain">
+    <value>Playback failed. Select the song again to retry.</value>
+  </data>
+  <data xml:space="preserve" name="Buffering">
+    <value>Buffering…</value>
+  </data>
+  <data xml:space="preserve" name="PositionReadFailed">
+    <value>Playback position is temporarily unavailable</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackSessionExpired">
+    <value>Your sign-in has expired. Import the Cookie again.</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackRateLimited">
+    <value>Too many requests. Try again later.</value>
+  </data>
+  <data xml:space="preserve" name="OfficialVerificationRequired">
+    <value>This song needs additional official playback verification and cannot be played yet</value>
+  </data>
+  <data xml:space="preserve" name="AudioRequestTimeout">
+    <value>Fetching audio timed out. Try again.</value>
+  </data>
+  <data xml:space="preserve" name="SabrNotSupported">
+    <value>This song requires SABR audio, which this client does not support yet</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackSongUnavailable">
+    <value>This song is currently unavailable</value>
+  </data>
+  <data xml:space="preserve" name="NoAacSource">
+    <value>No AAC audio source is currently available for this song</value>
+  </data>
+  <data xml:space="preserve" name="DashUnsupported">
+    <value>This version of Windows does not support DASH audio playback</value>
+  </data>
+  <data xml:space="preserve" name="AudioLoadFailed">
+    <value>Could not load audio. Check your sign-in or network and try again.</value>
+  </data>
+  <data xml:space="preserve" name="PlaybackOperationFailed">
+    <value>The playback operation failed. Try again.</value>
+  </data>
+  <data xml:space="preserve" name="Language">
+    <value>Language</value>
+  </data>
+  <data xml:space="preserve" name="LanguageDescription">
+    <value>Choose the display language. Changes take effect after restarting the app.</value>
+  </data>
+  <data xml:space="preserve" name="FollowSystem">
+    <value>Use system language</value>
+  </data>
+  <data xml:space="preserve" name="LanguageRestartNotice">
+    <value>The language will change after the app restarts.</value>
+  </data>
+  <data xml:space="preserve" name="LanguageSaved">
+    <value>Language preference saved. It will apply the next time the app starts.</value>
+  </data>
+  <data xml:space="preserve" name="RestartNow">
+    <value>Restart now</value>
+  </data>
+  <data xml:space="preserve" name="RestartLater">
+    <value>Restart later</value>
+  </data>
+  <data xml:space="preserve" name="CurrentAccountFormat">
+    <value>Current account: {0}</value>
+  </data>
+</root>
