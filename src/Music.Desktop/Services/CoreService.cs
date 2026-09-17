@@ -10,11 +10,13 @@ public sealed class CoreService : IAsyncDisposable
     private readonly SemaphoreSlim gate = new(1, 1);
     private readonly SessionStore store;
     private MusicCoreClient client;
+    private readonly MusicCoreClient anonymousClient;
     private bool disposed;
 
     private CoreService(MusicCoreClient client, SessionStore store)
     {
         this.client = client;
+        anonymousClient = client;
         this.store = store;
     }
 
@@ -87,7 +89,8 @@ public sealed class CoreService : IAsyncDisposable
             client = candidate;
             candidate = null;
             SetAccount(account);
-            await DisposeQuietlyAsync(previous).ConfigureAwait(false);
+            if (!ReferenceEquals(previous, anonymousClient))
+                await DisposeQuietlyAsync(previous).ConfigureAwait(false);
         }
         catch (MusicCoreException error) { throw Sanitize(error); }
         catch (Exception error) when (IsStorageError(error)) { throw new InvalidOperationException("The verified session could not be saved securely."); }
@@ -112,7 +115,8 @@ public sealed class CoreService : IAsyncDisposable
             client = candidate;
             candidate = null;
             SetAccount(account);
-            await DisposeQuietlyAsync(previous).ConfigureAwait(false);
+            if (!ReferenceEquals(previous, anonymousClient))
+                await DisposeQuietlyAsync(previous).ConfigureAwait(false);
         }
         catch (MusicCoreException error) { throw Sanitize(error); }
         catch (Exception error) when (IsStorageError(error)) { throw new InvalidOperationException("The selected account could not be saved securely."); }
@@ -145,25 +149,19 @@ public sealed class CoreService : IAsyncDisposable
     public async Task SignOutAsync(CancellationToken cancellation = default)
     {
         await gate.WaitAsync(cancellation).ConfigureAwait(false);
-        MusicCoreClient? anonymous = null;
         try
         {
             ThrowIfDisposed();
-            anonymous = await MusicCoreClient.CreateAsync(DefaultConfig(), cancellation).ConfigureAwait(false);
+            // Sign-out must work offline. Reuse the already bootstrapped anonymous client.
             await store.DeleteAsync(cancellation).ConfigureAwait(false);
             MusicCoreClient previous = client;
-            client = anonymous;
-            anonymous = null;
+            client = anonymousClient;
             MarkSignedOut("signed_out");
-            await DisposeQuietlyAsync(previous).ConfigureAwait(false);
+            if (!ReferenceEquals(previous, anonymousClient))
+                await DisposeQuietlyAsync(previous).ConfigureAwait(false);
         }
-        catch (MusicCoreException error) { throw Sanitize(error); }
         catch (Exception error) when (IsStorageError(error)) { throw new InvalidOperationException("The saved session could not be removed."); }
-        finally
-        {
-            if (anonymous is not null) await DisposeQuietlyAsync(anonymous).ConfigureAwait(false);
-            gate.Release();
-        }
+        finally { gate.Release(); }
     }
 
     private async Task RestoreAsync(CancellationToken cancellation)
@@ -190,7 +188,8 @@ public sealed class CoreService : IAsyncDisposable
             client = candidate;
             candidate = null;
             SetAccount(account);
-            await DisposeQuietlyAsync(previous).ConfigureAwait(false);
+            if (!ReferenceEquals(previous, anonymousClient))
+                await DisposeQuietlyAsync(previous).ConfigureAwait(false);
         }
         catch (OperationCanceledException) { throw; }
         catch (MusicCoreException error)
@@ -264,6 +263,8 @@ public sealed class CoreService : IAsyncDisposable
             if (disposed) return;
             disposed = true;
             await DisposeQuietlyAsync(client).ConfigureAwait(false);
+            if (!ReferenceEquals(client, anonymousClient))
+                await DisposeQuietlyAsync(anonymousClient).ConfigureAwait(false);
         }
         finally { gate.Release(); }
     }
